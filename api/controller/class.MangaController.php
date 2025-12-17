@@ -3,23 +3,23 @@
 require_once __DIR__ . "\..\dao\class.MangaDAO.php";
 
 class MangaController {
-    static function GetTodos(){
+    static function GetTodos($request, $url){
         return MangaDAO::GetTodos();
     }
-
-    static function Get(){
-        
+    
+    static function Get($request, $url){
+        return MangaDAO::Get($url);
     }
-
-    static function Post(){
-        
+    
+    static function Post($request, $url){
+        return MangaDAO::Post($request->BODY);
     }
-
-    static function Put(){
-        
+    
+    static function Put($request, $url){
+        return MangaDAO::Put($request->BODY, $url);
     }
-
-    static function Delete(){
-        
+    
+    static function Delete($request, $url){
+        return MangaDAO::Delete($url);
     }
 }

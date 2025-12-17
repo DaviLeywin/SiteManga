@@ -6,16 +6,16 @@ class MangaDAO {
     static function GetTodos(){
         return DAO::Get()->Tabela("mangas")->Execute();            
     }   
-    static function Get($campos = null, $wheres = null){
-        return DAO::Get()->Tabela('capitulos')->Execute();
+    static function Get($where){
+        return DAO::Get()->Tabela('mangas')->Where($where)->Execute();
     }
     static function Post($dados){
-        print_r(DAO::Get()->Tabela("mangas")->Where(id:1)->Execute());
+        return DAO::Post()->Tabela("generos")->Dados($dados)->Execute();
     }
     static function Delete($where){
-        print_r(DAO::Delete()->Tabela("mangas")->Where(["id" => 1])->Execute());     
+        return DAO::Delete()->Tabela("mangas")->Where($where)->Execute();     
     }
-    static function Put($campos,$where){
-        print_r(DAO::Put()->Tabela("mangas")->Dados(titulo:'Naruta')->Where(id:2)->Execute());   
+    static function Put($dados,$where){
+        return DAO::Put()->Tabela("mangas")->Dados($dados)->Where($where)->Execute();   
     }
 }

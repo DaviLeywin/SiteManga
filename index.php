@@ -16,4 +16,7 @@
 // Documentos::C_arquivos(caminho:"api/dao",arquivos:["Usuario","Manga","Novel","Ranking","Origem"]);
 // Documentos::C_arquivos(caminho:"api",arquivos:["index.php","class.Rotas.php","class.Request.php",".htaccess"]);
 // Documentos::C_arquivos(caminho:"web",arquivos:[".htaccess"]);
+// Documentos::C_arquivos(caminho:"api/controller",arquivos:["Autor","Genero","GeneroManga","Avaliacao","Favorito","ComentarioManga","Capitulo"]);
+// Documentos::C_arquivos(caminho:"api/dao",arquivos:["Autor","Genero","GeneroManga","Avaliacao","Favorito","ComentarioManga","Capitulo"]);
+
 ?>

@@ -112,7 +112,7 @@ class DAO {
         foreach($dados as $nome => $value){
             $this->dados[$nome] = $value;
         }
-        return $this->dados;
+        return $this;
     }
 
 
@@ -231,6 +231,10 @@ class DAO {
         }
 
     }
+}
+
+class Controller {
+
 }
 
 class Documentos {

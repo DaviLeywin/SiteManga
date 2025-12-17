@@ -1,6 +1,5 @@
 <?php 
-require_once "config\config.php";
-// require_once __DIR__ . "\..\..\Framework.php";
+require_once __DIR__ . '/../config/config.php';
 
 class Banco {
     static $connDados;

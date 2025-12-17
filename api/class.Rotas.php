@@ -33,10 +33,10 @@ class Rotas{
             }
             $regex = "#^".preg_replace_callback(   '/\{([^\}]+)\}/' , function($m){ return "(?P<".$m[1].">[^/]+)";} , $rota['url'])."$#";
             if(preg_match($regex, $url, $parametros)){
-                array_shift($parametros);
+                $parametros = array_filter($parametros,fn($chave) => !is_int($chave),ARRAY_FILTER_USE_KEY);
                 [$controller,$metodo] = explode("@",$rota['acao']);
                 require_once "./controller/class.$controller.php";
-                return call_user_func_array([$controller,$metodo], [$parametros,$request]);
+                return call_user_func_array([$controller,$metodo], ['url' => $parametros,'request' => $request]);
                 exit;
             }
         }
