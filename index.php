@@ -1,5 +1,5 @@
 <?php
-require_once "Framework.php";
+// require_once "Framework.php";
 
 // Documentos::C_pastas(pastas:["api","web"]);
 // Documentos::C_pastas(caminho:"api", pastas:["controller","dao","banco","config","db"]);

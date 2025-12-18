@@ -1,5 +1,4 @@
 <?php
-
 class Request {
     public  $All = [];
     public  $BODY = [];

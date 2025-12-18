@@ -73,6 +73,7 @@ class Banco {
     static function RecriarBanco(){
         self::DeletarBanco();
         self::CriarBanco();
+        self::CriarSql();
         return Response::Success("Banco recriado com sucesso!");
     }
 }

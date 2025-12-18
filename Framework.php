@@ -1,44 +1,62 @@
 <?php
 require_once "api\banco\class.Banco.php";
-// require_once "config\config.php";
+
+set_exception_handler(function (Throwable $e) {
+
+    if (!headers_sent()) {
+        header('Content-Type: application/json; charset=utf-8');
+    }
+
+    $code = 500;
+    $tipo = 'ERRO_INTERNO';
+    $mensagem = 'Erro inesperado';
+
+    if ($e instanceof TypeError || $e instanceof ValueError) {
+        $code = 400;
+        $tipo = 'ERRO_DE_TIPO';
+        $mensagem = 'Tipo de dado inválido';
+    }
+    elseif ($e instanceof InvalidArgumentException || $e instanceof DomainException) {
+        $code = 422;
+        $tipo = 'ERRO_DE_REGRA';
+        $mensagem = $e->getMessage();
+    }
+    elseif ($e instanceof PDOException || $e instanceof DatabaseException) {
+        $code = 500;
+        $tipo = 'ERRO_DE_BANCO';
+        $mensagem = 'Erro ao acessar o banco de dados';
+    }
+    elseif ($e instanceof LogicException) {
+        $code = 500;
+        $tipo = 'ERRO_DE_LOGICA';
+        $mensagem = 'Erro interno de lógica';
+    }
+    elseif ($e instanceof Error) {
+        $code = 500;
+        $tipo = 'ERRO_DE_EXECUCAO';
+        $mensagem = 'Erro interno de execução';
+    }
+
+    http_response_code($code);
+
+    echo json_encode([
+        'erro' => true,
+        'tipo' => $tipo,
+        'mensagem' => $mensagem,
+        'detalhes' => [
+            'mensagem' => $e->getMessage(),
+            'arquivo' => $e->getFile(),
+            'linha' => $e->getLine(),
+        ]
+    ], JSON_PRETTY_PRINT);
+
+    exit;
+});
 
 enum Ordem: string {
     case ASC = 'ASC';
     case DESC = 'DESC';
 }
-
-set_exception_handler(function (Throwable $e) {
-    $code = 100;
-    $resposta = [
-        'erro' => true,
-        'tipo' => 'ERRO_INTERNO',
-        'mensagem' => 'Erro inesperado',
-    ];
-
-    if ($e instanceof TypeError) {
-        $code = 401;
-        $resposta['tipo'] = 'ERRO_DE_TIPO';
-        $resposta['mensagem'] = 'Tipo de dado inválido';
-    } elseif ($e instanceof InvalidArgumentException) {
-        $code = 301;
-        $resposta['tipo'] = 'ERRO_DE_REGRA';
-        $resposta['mensagem'] = $e->getMessage();
-    } elseif ($e instanceof DatabaseException) {
-        $code = 501;
-        $resposta['tipo'] = 'ERRO_DE_BANCO';
-        $resposta['mensagem'] = $e->getMessage();
-    }
-
-
-    $resposta['detalhes'] = [
-        'mensagem' => $e->getMessage(),
-        'arquivo' => $e->getFile(),
-        'linha' => $e->getLine(),
-    ];
-    http_response_code($code);
-    echo json_encode($resposta, JSON_PRETTY_PRINT);
-    exit;
-});
 
 class DAO {
     public $tipo;
@@ -61,7 +79,7 @@ class DAO {
 
 
     public static function __callStatic($metodo,$params){
-        $valido = ['get','put','post','delete'];//true
+        $valido = ['get','put','post','delete','describe'];
         $metodo = strtolower($metodo);
         $inst = new self();
         if(in_array($metodo,$valido)){
@@ -145,150 +163,112 @@ class DAO {
         $orderBy = $this->orderBy ? $this->orderBy : null;
         $dadosGet = $this->dadosGet ? implode(",",$this->dadosGet): "*";
         $sql = "";
-
-        
-        if(in_array($tipo, ['put','delete']) && empty($wheres)){
-            return ["erro" => true, "mensagem" => "Operação bloqueada: WHERE obrigatório"];
-        }
-
-        if($tipo == "get"){
-            $sql = "SELECT $dadosGet FROM $tabela";
-        }
-
-        else if($tipo == "delete"){
-            $sql = "DELETE FROM $tabela";
-        }
-
-        else if($tipo === "post"){
-            $campos = implode(",", array_keys($dados));
-            $valores = implode(",", array_map(function($v){
-                if (is_string($v)) return "'" . addslashes($v) . "'";
-                if ($v === null) return "NULL";
-                return $v;
-            }, array_values($dados)));
-            $sql = "INSERT INTO $tabela ($campos) VALUES ($valores)";
-        }
-
-        else if($tipo === "put"){
-            $set = [];
-            foreach($dados as $campo => $valor){
-                if (is_string($valor)) $valor = "'" . addslashes($valor) . "'";
-                elseif ($valor === null) $valor = "NULL";
-                $set[] = "$campo = $valor";
+        try{
+            
+            if(in_array($tipo, ['put','delete']) && empty($wheres)){
+                return ["erro" => true, "mensagem" => "Operação bloqueada: WHERE obrigatório"];
             }
-            $sql = "UPDATE $tabela SET " . implode(", ", $set);
-        }
-        $conds = [];
-        if(!empty($wheres)){
+    
+            if($tipo == "get"){
+                $sql = "SELECT $dadosGet FROM $tabela";
+            }
+    
+            else if($tipo == "delete"){
+                $sql = "DELETE FROM $tabela";
+            }
+            else if($tipo == "describe"){
+                $sql = "DESC $tabela";
+            }
+    
+            else if($tipo === "post"){
+                $campos = implode(",", array_keys($dados));
+                $valores = implode(",", array_map(function($v){
+                    if (is_string($v)) return "'" . addslashes($v) . "'";
+                    if ($v === null) return "NULL";
+                    return $v;
+                }, array_values($dados)));
+                $sql = "INSERT INTO $tabela ($campos) VALUES ($valores)";
+            }
+            else if($tipo === "put"){
+                $set = [];
+                foreach($dados as $campo => $valor){
+                    if (is_string($valor)) $valor = "'" . addslashes($valor) . "'";
+                    elseif ($valor === null) $valor = "NULL";
+                    $set[] = "$campo = $valor";
+                }
+                $sql = "UPDATE $tabela SET " . implode(", ", $set);
+            }
             $conds = [];
-            foreach($wheres as $campo => $valor){
-                if (is_string($valor)) $valor = "'" . addslashes($valor) . "'";
-                elseif ($valor === null) $valor = "NULL";
-                $conds[] = "$campo = $valor";
+            if(!empty($wheres)){
+                $conds = [];
+                foreach($wheres as $campo => $valor){
+                    if (is_string($valor)) $valor = "'" . addslashes($valor) . "'";
+                    elseif ($valor === null) $valor = "NULL";
+                    $conds[] = "$campo = $valor";
+                }
+                $sql .= " WHERE " . implode(" AND ", $conds);
             }
-            $sql .= " WHERE " . implode(" AND ", $conds);
-        }
-        if($groupBy)$sql .= $groupBy;
-        if($orderBy)$sql .= $orderBy;
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
-        $this->dados = [];
-        $this->wheres = [];
-        $this->dadosGet = [];
-        $this->groupBy = null;
-        $this->orderBy = null;
-
-        if($tipo === "get"){
-            $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if(count($res) === 1){
-                return ["erro" => false, "mensagem" => "Dados encontrados com sucesso" ,"resultado" => $res[0]];
-            }else if(count($res) > 1){
-                return ["erro" => false, "mensagem" => "Dados encontrados com sucesso" ,"resultado" => $res];
-            }else if(count($res) === 0){
-                return ["erro" => true, "mensagem" => "Dados nao encontrados!"];
-            }
-            return count($res) === 1 ? $res[0] : $res;
-        }
-
-        if($tipo === "post"){
-            $id = $pdo->lastInsertId();
-            $sql = "SELECT * FROM $tabela WHERE ID = :ID;";
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(":ID",$id);
-            $stmt->execute();
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            return ["erro" => false, "Resultado" => $resultado];
-        }
-
-        if($tipo === "put"){
-            $linhas = $stmt->rowCount();
-            $sql = "SELECT * FROM $tabela" . " WHERE " . implode(" AND ", $conds);
+            if($groupBy)$sql .= $groupBy;
+            if($orderBy)$sql .= $orderBy;
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            if($linhas > 0) return ["erro" => false, "mensagem" => "Dados atualizados com sucesso" ,"resultado" => $resultado];
-            return ["erro" => true, "mensagem" => "Nenhum dado foi alterado"];
-        }
-
-        if($tipo === "delete"){
-            $linhas = $stmt->rowCount();
-            if($linhas > 0){
-                return ["erro" => false, "mensagem" => "Registro excluído com sucesso"];
+            $this->dados = [];
+            $this->wheres = [];
+            $this->dadosGet = [];
+            $this->groupBy = null;
+            $this->orderBy = null;
+    
+            if($tipo == "describe"){
+                $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if($res){
+                    return Response::Success("Descricao encontrada com sucesso!",$res);
+                }
+                return Response::Fail("Erro ao encontrar descricao!");
             }
-            return ["erro" => true, "mensagem" => "Nenhum registro foi excluído"];
+
+            if($tipo === "get"){
+                $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if(count($res) === 1){
+                    return ["erro" => false, "mensagem" => "Dados encontrados com sucesso" ,"resultado" => $res[0]];
+                }else if(count($res) > 1){
+                    return ["erro" => false, "mensagem" => "Dados encontrados com sucesso" ,"resultado" => $res];
+                }else if(count($res) === 0){
+                    return ["erro" => true, "mensagem" => "Dados nao encontrados!"];
+                }
+                return count($res) === 1 ? $res[0] : $res;
+            }
+    
+            if($tipo === "post"){
+                $id = $pdo->lastInsertId();
+                $sql = "SELECT * FROM $tabela WHERE ID = :ID;";
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(":ID",$id);
+                $stmt->execute();
+                $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+                return ["erro" => false, "Resultado" => $resultado];
+            }
+    
+            if($tipo === "put"){
+                $linhas = $stmt->rowCount();
+                $sql = "SELECT * FROM $tabela" . " WHERE " . implode(" AND ", $conds);
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute();
+                $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+                if($linhas > 0) return ["erro" => false, "mensagem" => "Dados atualizados com sucesso" ,"resultado" => $resultado];
+                return ["erro" => true, "mensagem" => "Nenhum dado foi alterado"];
+            }
+    
+            if($tipo === "delete"){
+                $linhas = $stmt->rowCount();
+                if($linhas > 0){
+                    return ["erro" => false, "mensagem" => "Registro excluído com sucesso"];
+                }
+                return ["erro" => true, "mensagem" => "Nenhum registro foi excluído"];
+            }
+        }catch(Exception $e){
+            throw new InvalidArgumentException("Erro desconhecido no executar!");
         }
 
-    }
-}
-
-class Controller {
-
-}
-
-class OC{
-    static function EstaVazio($valor, &$dadosDeErro){
-        if(is_null($valor) || trim($valor) === ""){
-            $dadosDeErro = ["erro" => true, "mensagem" => "dados faltando!"];
-            return true;
-        }
-        return false;
-    }
-
-    static function TamanhoErrado($max, $min, $valor, &$dadosDeErro){
-         if(strlen($valor) > $max || strlen($valor) < $min){
-            $dadosDeErro = ["erro" => true, "mensagem" => "O valor deve ter entre {$min} e {$max} caracteres!"];
-            return true;
-        }
-        return false;
-    }
-
-    static function EmailInvalido($email, &$dadosDeErro){
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-            $dadosDeErro = ["erro" => true, "mensagem" => "Este email é invalido!"]; 
-            return true;
-        }
-        return false;
-    }
-
-    static function senhaInvalida($validos, $senha, &$dadosDeErro){
-        $parametroRegex = '';
-
-        if(is_array($validos)){
-            foreach($validos as $valido){
-            if($valido == "numeros")$parametroRegex .= "0-9";
-            else if($valido == "letras")$parametroRegex .= "a-zA-Z";
-            else $parametroRegex .= preg_quote($valido, "/");
-        }
-        }
-        if($parametroRegex === '')$parametroRegex = 'a-zA-Z0-9';
-        
-        $regex = '#^[' . $parametroRegex . ']+$#';
-
-        if(!preg_match($regex,$senha)){
-            $dadosDeErro = ["erro" => true, "mensagem" => "Senha invalida!"];
-            return true;
-        }
-        return false;
     }
 }
 

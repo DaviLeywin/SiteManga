@@ -15,4 +15,7 @@ class MangasDAO {
     static function Put($dados,$where){
         return DAO::Put()->Tabela("mangas")->Dados($dados)->Where($where)->Execute();   
     }
+    static function Describe(){
+        return DAO::Describe();   
+    }
 }
