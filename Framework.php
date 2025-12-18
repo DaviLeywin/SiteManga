@@ -8,7 +8,7 @@ enum Ordem: string {
 }
 
 set_exception_handler(function (Throwable $e) {
-
+    $code = 100;
     $resposta = [
         'erro' => true,
         'tipo' => 'ERRO_INTERNO',
@@ -16,9 +16,11 @@ set_exception_handler(function (Throwable $e) {
     ];
 
     if ($e instanceof TypeError) {
+        $code = 401;
         $resposta['tipo'] = 'ERRO_DE_TIPO';
         $resposta['mensagem'] = 'Tipo de dado inválido';
     } elseif ($e instanceof InvalidArgumentException) {
+        $code = 301;
         $resposta['tipo'] = 'ERRO_DE_REGRA';
         $resposta['mensagem'] = $e->getMessage();
     }
@@ -28,6 +30,7 @@ set_exception_handler(function (Throwable $e) {
         'arquivo' => $e->getFile(),
         'linha' => $e->getLine(),
     ];
+    http_response_code($code);
     echo json_encode($resposta, JSON_PRETTY_PRINT);
     exit;
 });
@@ -237,6 +240,54 @@ class Controller {
 
 }
 
+class OC{
+    static function EstaVazio($valor, &$dadosDeErro){
+        if(is_null($valor) || trim($valor) === ""){
+            $dadosDeErro = ["erro" => true, "mensagem" => "dados faltando!"];
+            return true;
+        }
+        return false;
+    }
+
+    static function TamanhoErrado($max, $min, $valor, &$dadosDeErro){
+         if(strlen($valor) > $max || strlen($valor) < $min){
+            $dadosDeErro = ["erro" => true, "mensagem" => "O valor deve ter entre {$min} e {$max} caracteres!"];
+            return true;
+        }
+        return false;
+    }
+
+    static function EmailInvalido($email, &$dadosDeErro){
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            $dadosDeErro = ["erro" => true, "mensagem" => "Este email é invalido!"]; 
+            return true;
+        }
+        return false;
+    }
+
+    static function senhaInvalida($validos, $senha, &$dadosDeErro){
+        $parametroRegex = '';
+
+        if(is_array($validos)){
+            foreach($validos as $valido){
+            if($valido == "numeros")$parametroRegex .= "0-9";
+            else if($valido == "letras")$parametroRegex .= "a-zA-Z";
+            else $parametroRegex .= preg_quote($valido, "/");
+        }
+        }
+        if($parametroRegex === '')$parametroRegex = 'a-zA-Z0-9';
+        
+        $regex = '#^[' . $parametroRegex . ']+$#';
+
+        if(!preg_match($regex,$senha)){
+            $dadosDeErro = ["erro" => true, "mensagem" => "Senha invalida!"];
+            return true;
+        }
+        return false;
+    }
+}
+
+
 class Documentos {
     
     static function C_arquivos($completar = true, $caminho = null, $arquivos = [], ...$datas){
@@ -379,52 +430,4 @@ class {$nome}DAO {
         }
     }
 }
-
-class OC{
-    static function EstaVazio($valor, &$dadosDeErro){
-        if(is_null($valor) || trim($valor) === ""){
-            $dadosDeErro = ["erro" => true, "mensagem" => "dados faltando!"];
-            return true;
-        }
-        return false;
-    }
-
-    static function TamanhoErrado($max, $min, $valor, &$dadosDeErro){
-         if(strlen($valor) > $max || strlen($valor) < $min){
-            $dadosDeErro = ["erro" => true, "mensagem" => "O valor deve ter entre {$min} e {$max} caracteres!"];
-            return true;
-        }
-        return false;
-    }
-
-    static function EmailInvalido($email, &$dadosDeErro){
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-            $dadosDeErro = ["erro" => true, "mensagem" => "Este email é invalido!"]; 
-            return true;
-        }
-        return false;
-    }
-
-    static function senhaInvalida($validos, $senha, &$dadosDeErro){
-        $parametroRegex = '';
-
-        if(is_array($validos)){
-            foreach($validos as $valido){
-            if($valido == "numeros")$parametroRegex .= "0-9";
-            else if($valido == "letras")$parametroRegex .= "a-zA-Z";
-            else $parametroRegex .= preg_quote($valido, "/");
-        }
-        }
-        if($parametroRegex === '')$parametroRegex = 'a-zA-Z0-9';
-        
-        $regex = '#^[' . $parametroRegex . ']+$#';
-
-        if(!preg_match($regex,$senha)){
-            $dadosDeErro = ["erro" => true, "mensagem" => "Senha invalida!"];
-            return true;
-        }
-        return false;
-    }
-}
-
 ?>
