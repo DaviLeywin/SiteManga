@@ -1,60 +1,79 @@
-<?php 
+<?php
 require_once __DIR__ . '/../config/config.php';
 
 class Banco {
-    static $connDados;
+    static $pdo;
     static $sql;
     static $insert;
+    static $host;
+    static $senha;
+    static $usuario;
+    static $banco;
 
     static function init(){
-        self::$connDados = $GLOBALS['conn'];
+        self::$host = $GLOBALS['conn']['host'];
+        self::$senha = $GLOBALS['conn']['senha'];
+        self::$usuario = $GLOBALS['conn']['usuario'];
+        self::$banco = $GLOBALS['conn']['banco'];
         self::$sql = $GLOBALS['sql'];
         self::$insert = $GLOBALS['insert'];
     }
-    
-    static function IniciarBanco(){
+
+    static function CriarBanco(){
         self::init();
-        $usuario = self::$connDados["usuario"];
-        $senha = self::$connDados["senha"];
-        $banco = self::$connDados["banco"];
-        $host = self::$connDados["host"];
-        $sqls = self::$sql;
-        $inserts = self::$insert;
-        
         try{
-            $conn = new PDO("mysql:host=$host;charset=utf8",$usuario,$senha);
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
-            $conn->exec("DROP DATABASE IF EXISTS $banco;");
-            $conn->exec("CREATE DATABASE IF NOT EXISTS $banco;");    
-            $conn->exec("USE $banco;");
-            
-            foreach($sqls as $sql){
-                $conn->exec($sql);
-            }
-            foreach($inserts as $insert){
-                $conn->exec($insert);
-            }
-            return "Banco ". $banco ." recriado com sucesso!";
+            $conn = new PDO("mysql:host=".self::$host.";charset=utf8",self::$usuario, self::$senha);
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);            
+            $sql = "CREATE DATABASE IF NOT EXISTS ".self::$banco.";";
+            $conn->exec($sql);
+            return Response::Success("Banco criado com sucesso!");
         }catch(Exception $e){
-            throw new InvalidArgumentException("Erro ao recriar com o banco");
+            throw new DatabaseException("Erro ao criar com o banco: ".$e->getMessage());
         }
     }
-    
-    static function Conexao(){
-        try{
-            self::init();
-            $usuario = self::$connDados["usuario"];
-            $senha = self::$connDados["senha"];
-            $banco = self::$connDados["banco"];
-            $host = self::$connDados["host"];
 
-            $conn = new PDO("mysql:host=".$host.";dbname=".$banco,$usuario,$senha);
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    static function DeletarBanco(){
+        self::init();
+        try{
+            $conn = new PDO("mysql:host=".self::$host.";charset=utf8",self::$usuario, self::$senha);
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);            
+            $sql = "DROP DATABASE IF EXISTS ".self::$banco.";";
+            $conn->exec($sql);
+            return Response::Success("Banco apagado com sucesso!");
+        }catch(Exception $e){
+            throw new DatabaseException("Erro ao apagar com o banco: ".$e->getMessage());
+        }
+    }
+
+    static function BuscarConexao(){
+        self::init();
+        try{
+            $conn = new PDO("mysql:host=".self::$host.";dbname=".self::$banco,self::$usuario, self::$senha);
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);            
             return $conn;
         }catch(Exception $e){
-            throw new InvalidArgumentException("Erro ao conectar com o banco");
+            throw new DatabaseException("Erro ao conectar com o banco: ".$e->getMessage());
         }
+    }
+
+    static function CriarSql(){
+        self::$pdo = self::BuscarConexao();
+        try{
+            foreach(self::$sql as $sql){
+                self::$pdo->exec($sql);
+            }
+            foreach(self::$insert as $insert){
+                self::$pdo->exec($insert);
+            }
+        }catch(Exception $e){
+            throw new DatabaseException("Erro ao criar SQL: ".$e->getMessage());
+        }
+    }
+
+    static function RecriarBanco(){
+        self::DeletarBanco();
+        self::CriarBanco();
+        return Response::Success("Banco recriado com sucesso!");
     }
 }
 ?>

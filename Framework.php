@@ -23,7 +23,12 @@ set_exception_handler(function (Throwable $e) {
         $code = 301;
         $resposta['tipo'] = 'ERRO_DE_REGRA';
         $resposta['mensagem'] = $e->getMessage();
+    } elseif ($e instanceof DatabaseException) {
+        $code = 501;
+        $resposta['tipo'] = 'ERRO_DE_BANCO';
+        $resposta['mensagem'] = $e->getMessage();
     }
+
 
     $resposta['detalhes'] = [
         'mensagem' => $e->getMessage(),
@@ -47,7 +52,7 @@ class DAO {
 
 
     public function init(){
-        $this->pdo = Banco::Conexao();
+        $this->pdo = Banco::BuscarConexao();
         if (!$this->pdo) {
             throw new InvalidArgumentException("me matei n deu!");
         }

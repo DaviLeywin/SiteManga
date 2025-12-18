@@ -2,8 +2,13 @@
 declare(strict_types=1);
 require_once __DIR__ . "\..\Framework.php";
 require_once "class.Rotas.php";
+require_once "class.Response.php";
 
 $rotas = new Rotas();
+//banco
+$rotas->put('/RecriarBanco','BancoController@RecriarBanco'); 
+$rotas->post('/CriarBanco','BancoController@CriarBanco');
+$rotas->delete('/DeletarBanco','BancoController@DeletarBanco');
 //autores
 $rotas->get('/BuscarAutor/{id}','AutoresController@Get');
 $rotas->get('/BuscarAutores','AutoresController@GetTodos');

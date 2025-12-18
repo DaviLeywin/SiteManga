@@ -21,5 +21,5 @@ class Generos_MangasController {
     static function Delete($request, $url){
         return Generos_MangasDAO::Delete($url);
     }
-}
+} 
   
