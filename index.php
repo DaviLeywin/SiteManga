@@ -1,5 +1,5 @@
 <?php
-// require_once "Framework.php";
+require_once "Framework.php";
 
 // Documentos::C_pastas(pastas:["api","web"]);
 // Documentos::C_pastas(caminho:"api", pastas:["controller","dao","banco","config","db"]);
@@ -17,6 +17,8 @@
 // Documentos::C_arquivos(caminho:"api",arquivos:["index.php","class.Rotas.php","class.Request.php",".htaccess"]);
 // Documentos::C_arquivos(caminho:"web",arquivos:[".htaccess"]);
 // Documentos::C_arquivos(caminho:"api/controller",arquivos:["Autor","Genero","GeneroManga","Avaliacao","Favorito","ComentarioManga","Capitulo"]);
-// Documentos::C_arquivos(caminho:"api/dao",arquivos:["Autor","Genero","GeneroManga","Avaliacao","Favorito","ComentarioManga","Capitulo"]);
+// Documentos::C_arquivos(caminho:"api/controller",arquivos:["Autores","Usuarios","Generos","Generos_Mangas","Rankings","Avaliacoes","Favoritos","Comentarios_Manga","Capitulos"]);
+// Documentos::C_arquivos(caminho:"api/dao",arquivos:["Autores","Usuarios","Generos","Generos_Mangas","Rankings","Avaliacoes","Favoritos","Comentarios_Manga","Capitulos"]);
+// Documentos::C_arquivos(caminho:"api/controller",arquivos:["Autora"]);
 
 ?>

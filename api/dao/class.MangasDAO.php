@@ -1,8 +1,5 @@
 <?php
-declare(strict_types=1);
-require_once __DIR__ . "\..\..\Framework.php";
-
-class MangaDAO {
+class MangasDAO {
     static function GetTodos(){
         return DAO::Get()->Tabela("mangas")->Execute();            
     }   
@@ -10,7 +7,7 @@ class MangaDAO {
         return DAO::Get()->Tabela('mangas')->Where($where)->Execute();
     }
     static function Post($dados){
-        return DAO::Post()->Tabela("generos")->Dados($dados)->Execute();
+        return DAO::Post()->Tabela("mangas")->Dados($dados)->Execute();
     }
     static function Delete($where){
         return DAO::Delete()->Tabela("mangas")->Where($where)->Execute();     

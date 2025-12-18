@@ -257,13 +257,65 @@ class Documentos {
                     if(str_ends_with($caminho,"controller") && $completar == true){
                         $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR . $caminho . DIRECTORY_SEPARATOR ."class.". $nome."Controller.php";
                         $arquivo = fopen($pastaLocal,"w");
+                        $nomeMS = substr($nome,1);
+                        fwrite($arquivo,"<?php
+require_once __DIR__ . '\..\dao\class.{$nome}DAO.php';
+
+class {$nome}Controller {
+    static function GetTodos(\$request, \$url){
+        return {$nome}DAO::GetTodos();
+    }
+    
+    static function Get(\$request, \$url){
+        return {$nome}DAO::Get(\$url);
+    }
+    
+    static function Post(\$request, \$url){
+        return {$nome}DAO::Post(\$request->BODY);
+    }
+    
+    static function Put(\$request, \$url){
+        return {$nome}DAO::Put(\$request->BODY, \$url);
+    }
+    
+    static function Delete(\$request, \$url){
+        return {$nome}DAO::Delete(\$url);
+    }
+}
+
+\$rotas->get('/BuscarNome/{id}','{$nome}Controller@Get');
+\$rotas->get('/Buscar{$nome}','{$nome}Controller@GetTodos');
+\$rotas->post('/InserirNome','{$nome}Controller@Post');
+\$rotas->delete('/DeletarNome/{id}','{$nome}Controller@Delete');
+\$rotas->put('/AtualizarNome/{id}','{$nome}Controller@Put');    
+"
+                        );
                     }
                     else if(str_ends_with($caminho,"dao") && $completar == true){
                         $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR . $caminho . DIRECTORY_SEPARATOR ."class.". $nome."DAO.php";
                         $arquivo = fopen($pastaLocal,"w");
+                        $nomeD = strtolower($nome);
+                        fwrite($arquivo,"<?php
+class {$nome}DAO {
+    static function GetTodos(){
+        return DAO::Get()->Tabela('{$nomeD}')->Execute();            
+    }   
+    static function Get(\$where){
+        return DAO::Get()->Tabela('{$nomeD}')->Where(\$where)->Execute();
+    }
+    static function Post(\$dados){
+        return DAO::Post()->Tabela('{$nomeD}')->Dados(\$dados)->Execute();
+    }
+    static function Delete(\$where){
+        return DAO::Delete()->Tabela('{$nomeD}')->Where(\$where)->Execute();     
+    }
+    static function Put(\$dados,\$where){
+        return DAO::Put()->Tabela('{$nomeD}')->Dados(\$dados)->Where(\$where)->Execute();   
+    }
+}");
                     }
                     else{ $arquivo = fopen($pastaLocal,"w");}
-                    if(str_ends_with(basename($pastaLocal),".php")){
+                    if(str_ends_with(basename($pastaLocal),".php") && !str_ends_with(basename($pastaLocal),"Controller.php") && !str_ends_with(basename($pastaLocal),"DAO.php")){
                         fwrite($arquivo,"<?php");
                     }
                     if(str_ends_with(basename($pastaLocal),"htaccess")){
