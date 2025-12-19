@@ -40,7 +40,7 @@ class Banco {
             $sql = "DROP DATABASE IF EXISTS ".self::$banco.";";
             $conn->exec($sql);
             return Response::Success("Banco apagado com sucesso!");
-        }catch(Exception $e){
+        }catch(DatabaseException $e){
             throw new DatabaseException("Erro ao apagar com o banco: ".$e->getMessage());
         }
     }

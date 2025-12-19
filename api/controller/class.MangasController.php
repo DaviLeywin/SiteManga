@@ -1,31 +1,33 @@
 <?php 
-declare(strict_types=1);
 require_once __DIR__ . "\..\services\class.MangasService.php";
 
 class MangasController {
     static function GetTodos($request, $url){
-        return MangasDAO::GetTodos();
+        return MangasService::GetTodos();
     }
     
     static function Get($request, $url){
-        return MangasDAO::Get($url);
-    }
-    
+        $url['id'] = (int) $url['id'];
+        return MangasService::Get($url);
+    }    
+
     static function Post($request, $url){
-        $mundo = MangasServices::Post();
-        foreach($request->BODY as $index => $value ){
-            if(empty($value)) return Response::Fail("Campos obrigatorios faltando!");
+        if(empty($request->BODY)){
+            return Response::Fail("Dados vazios!");
         }
+        return MangasService::Post($request->BODY);
     }
-    
+
     static function Put($request, $url){
-        foreach($request->BODY as $index => $value ){
-            if(empty($value)) return Response::Fail("Campos obrigatorios faltando!");
+        $url['id'] = (int) $url['id'];
+        if(empty($request->BODY)){
+            return Response::Fail("Dados vazios!");
         }
-        return MangasDAO::Put($request->BODY, $url);
-    }
-    
+        return MangasService::Put($request->BODY, $url);
+    }    
+
     static function Delete($request, $url){
-        return MangasDAO::Delete($url);
+        $url['id'] = (int) $url['id'];
+        return MangasService::Delete($url);
     }
 }

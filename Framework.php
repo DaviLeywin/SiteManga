@@ -58,6 +58,135 @@ enum Ordem: string {
     case DESC = 'DESC';
 }
 
+class Services {
+    static function capturaParenteses(string $tipo): ?string {
+        if (preg_match('/\(([^)]+)\)/', $tipo, $matches)) {
+            return $matches[1]; 
+        }
+        return null;
+    }
+
+    static function ValidarNotNull(array $dados = [],array $descricao = []){
+        if(empty($dados)) throw new InvalidArgumentException("Dados vazios para validacao!");
+        if(empty($descricao)) throw new InvalidArgumentException("Descricao vazia para validacao!");
+
+        $notnull = array_filter($descricao['resposta'], fn($d) => $d['Null'] === "NO" and $d['Field'] !== "ID");
+        $dadosNotNull = [];
+
+
+        foreach($notnull as $nn){
+            $NomeDoNN = $nn['Field'];
+            if(!isset($dados[$NomeDoNN])){
+                $dadosNotNull["Campos faltando que n podem ser nulos"][] = $NomeDoNN;
+            }
+            else if(($dados[$NomeDoNN]) == 0){
+                continue;
+            }
+            else if(empty(trim($dados[$NomeDoNN]))){
+                $dadosNotNull["Campos vazios"][] = $NomeDoNN;
+            }
+        }
+        return $dadosNotNull;
+    }
+
+    static function ValidarTamanho(array $dados = [], array $descricao = []){
+        if(empty($dados)) throw new InvalidArgumentException("Dados vazios para validacao!");
+        if(empty($descricao)) throw new InvalidArgumentException("Descricao vazia para validacao!");
+
+        $TamanhoErrado = [];
+        foreach($descricao['resposta'] as $d){
+            if($d['Field'] == "ID")continue;
+            $tipoBanco = $d['Type'];
+            preg_match('/^([a-zA-Z]+)/', $tipoBanco, $m);
+            $TipoDeDadosSemP = strtoupper($m[0]);
+            $ValorDoParenteses = self::capturaParenteses($tipoBanco);
+            $ValorRecebido = $dados[$d['Field']] ?? null;
+            if(is_null($ValorRecebido))continue;
+            if($TipoDeDadosSemP !== 'ENUM' and !is_null($ValorDoParenteses)){
+                $max = (int)$ValorDoParenteses;
+                if($max > 0 && strlen($ValorRecebido) > $max){
+                    $TamanhoErrado[] = [
+                        'valor_recebido' => $ValorRecebido,
+                        'tamanho_recebido' => strlen($ValorRecebido),
+                        'tamanho_maximo' => $max,
+                    ];
+                }
+            }
+        }
+        return $TamanhoErrado;
+    }
+
+    static function ValidarTipo(array $dados = [], array $descricao = [],string $tabela = "",array $url = []) :array{
+        if(empty($dados)) throw new InvalidArgumentException("Dados vazios para validacao!");
+        if(empty($descricao)) throw new InvalidArgumentException("Descricao vazia para validacao!");
+        if(empty($tabela)) throw new InvalidArgumentException("Tabela vazia para validacao!");
+
+        $relacoes = [
+            'VARCHAR'    => fn($v) => is_string($v),
+            'CHAR'       => fn($v) => is_string($v),
+            'TEXT'       => fn($v) => is_string($v),
+            'INT'        => fn($v) => is_numeric($v) && (int)$v == $v,
+            'TINYINT'    => fn($v) => is_numeric($v) && (int)$v == $v,
+            'SMALLINT'   => fn($v) => is_numeric($v) && (int)$v == $v,
+            'MEDIUMINT'  => fn($v) => is_numeric($v) && (int)$v == $v,
+            'BIGINT'     => fn($v) => is_numeric($v) && (int)$v == $v,
+            'DECIMAL'    => fn($v) => is_numeric($v),
+            'NUMERIC'    => fn($v) => is_numeric($v),
+            'FLOAT'      => fn($v) => is_numeric($v),
+            'DOUBLE'     => fn($v) => is_numeric($v),
+            'BOOL'       => fn($v) => is_bool($v) || $v === 0 || $v === 1, // aceita 0/1 como booleano
+            'BOOLEAN'    => fn($v) => is_bool($v) || $v === 0 || $v === 1,
+            'DATE'       => fn($v) => strtotime($v) !== false, // verifica se é data válida
+            'DATETIME'   => fn($v) => strtotime($v) !== false,
+            'TIMESTAMP'  => fn($v) => strtotime($v) !== false,
+            'TIME'       => fn($v) => preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $v),
+            'YEAR'       => fn($v) => is_numeric($v) && (int)$v > 0,
+            'ENUM'       => fn($v, $opcoes) => in_array($v, $opcoes, true), // precisa passar as opções do enum
+        ];
+        $dadosInvalidosTipo = [];
+        foreach($descricao['resposta'] as $d){
+            if($d['Key'] == "ID")continue;
+            $tipoBanco = $d['Type'];
+            preg_match('/^([a-zA-Z]+)/', $tipoBanco, $m);
+            $TipoDeDadosSemP = strtoupper($m[0]);
+            $ValorDoParenteses = self::capturaParenteses($tipoBanco);
+            $ValorRecebido = $dados[$d['Field']] ?? null;
+            if(is_null($ValorRecebido))continue;
+            if($d['Key'] == "UNI"){
+                $resposta = DAO::Get()->Tabela($tabela)->Where([$d['Field'] => $ValorRecebido])->Execute();
+                $id = $resposta['resultado']['ID'] ?? "";
+                $id2 = $url['id'] ?? "0";
+                if($id == $id2)continue;
+                else if($resposta['erro'] == false){
+                    $dadosInvalidosTipo[] = [
+                    'valor recebido' => $ValorRecebido,
+                    'campo' => $d['Field'],
+                    'tipo_de_campo' => 'UNIQUE',
+                    'mensagem' => "Ja existe um campo com este valor!"
+                    ];
+                }
+            }
+            if($TipoDeDadosSemP !== 'ENUM'){
+                $valido = $relacoes[$TipoDeDadosSemP]($ValorRecebido);
+                if(!$valido)$dadosInvalidosTipo[] = [
+                    'valor recebido' => $ValorRecebido,
+                    'valore valido' => $TipoDeDadosSemP,
+                ];
+            }
+            else{
+                preg_match_all("/'([^']+)'/", $ValorDoParenteses, $matches);
+                $arrayValido = $matches[1];
+                $valido = $relacoes[$TipoDeDadosSemP]($ValorRecebido,$arrayValido);
+                if(!$valido)$dadosInvalidosTipo[] = [
+                    'valor recebido' => $ValorRecebido,
+                    'valores validos' => $arrayValido
+                ];
+            }
+        }
+        return $dadosInvalidosTipo;
+    }
+}
+
 class DAO {
     public $tipo;
     public $pdo;
@@ -177,7 +306,7 @@ class DAO {
                 $sql = "DELETE FROM $tabela";
             }
             else if($tipo == "describe"){
-                $sql = "DESC $tabela";
+                $sql = "DESCRIBE $tabela";
             }
     
             else if($tipo === "post"){
@@ -217,7 +346,7 @@ class DAO {
             $this->dadosGet = [];
             $this->groupBy = null;
             $this->orderBy = null;
-    
+            
             if($tipo == "describe"){
                 $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 if($res){
@@ -245,7 +374,7 @@ class DAO {
                 $stmt->bindParam(":ID",$id);
                 $stmt->execute();
                 $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-                return ["erro" => false, "Resultado" => $resultado];
+                return ["erro" => false, "resultado" => $resultado];
             }
     
             if($tipo === "put"){
@@ -271,7 +400,6 @@ class DAO {
 
     }
 }
-
 
 class Documentos {
     

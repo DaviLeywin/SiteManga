@@ -1,25 +1,34 @@
 <?php
-require_once __DIR__ . '\..\dao\class.UsuariosDAO.php';
+require_once __DIR__ . '\..\services\class.UsuariosService.php';
 
 class UsuariosController {
     static function GetTodos($request, $url){
-        return UsuariosDAO::GetTodos();
+        return UsuariosService::GetTodos();
     }
     
     static function Get($request, $url){
-        return UsuariosDAO::Get($url);
+        $url['id'] = (int)$url['id'];
+        return UsuariosService::Get($url);
     }
     
     static function Post($request, $url){
-        return UsuariosDAO::Post($request->BODY);
+        if(empty($request->BODY)){
+            return Response::Fail("Dados vazios!");
+        }
+        return UsuariosService::Post($request->BODY);
     }
     
     static function Put($request, $url){
-        return UsuariosDAO::Put($request->BODY, $url);
+        $url['id'] = (int)$url['id'];
+        if(empty($request->BODY)){
+            return Response::Fail("Dados vazios!");
+        }
+        return UsuariosService::Put($request->BODY, $url);
     }
     
     static function Delete($request, $url){
-        return UsuariosDAO::Delete($url);
+        $url['id'] = (int)$url['id'];
+        return UsuariosService::Delete($url);
     }
 }
 

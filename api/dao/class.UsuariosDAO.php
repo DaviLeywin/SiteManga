@@ -15,4 +15,7 @@ class UsuariosDAO {
     static function Put($dados,$where){
         return DAO::Put()->Tabela('usuarios')->Dados($dados)->Where($where)->Execute();   
     }
+    static function Describe(){
+        return DAO::Describe()->Tabela("usuarios")->Execute();   
+    }
 }

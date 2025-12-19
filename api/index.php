@@ -15,6 +15,12 @@ $rotas->get('/BuscarAutores','AutoresController@GetTodos');
 $rotas->post('/InserirAutor','AutoresController@Post');
 $rotas->delete('/DeletarAutor/{id}','AutoresController@Delete');
 $rotas->put('/AtualizarAutor/{id}','AutoresController@Put'); 
+//usuarios
+$rotas->get('/BuscarUsuario/{id}','UsuariosController@Get');
+$rotas->get('/BuscarUsuarios','UsuariosController@GetTodos');
+$rotas->post('/InserirUsuario','UsuariosController@Post');
+$rotas->delete('/DeletarUsuario/{id}','UsuariosController@Delete');
+$rotas->put('/AtualizarUsuario/{id}','UsuariosController@Put'); 
 //mangas
 $rotas->get("/BuscarManga/{id}","MangasController@Get");
 $rotas->get("/BuscarMangas","MangasController@GetTodos");
