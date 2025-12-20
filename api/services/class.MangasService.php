@@ -12,15 +12,15 @@ class MangasService {
 
     static function Post($request){
         $descricao = MangasDAO::Describe();
-        $resposta = Services::ValidarNotNull($request, $descricao);
-        if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
-        $resposta = Services::ValidarTipo($request, $descricao,"mangas");
-        if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
+        // return $descricao;
+        
         $resposta = Services::ValidarTamanho($request, $descricao);
+        return $resposta;
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
+
         return MangasDAO::Post($dados);
     }
-    
+
     static function Put($request, $url){
         $descricao = MangasDAO::Describe();
         $resposta = Services::ValidarTipo($request, $descricao,"mangas",$url);
