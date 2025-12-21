@@ -60,52 +60,36 @@ enum Ordem: string {
 
 class Services {
     static function capturaParenteses(string $tipo): ?string {
-        if (preg_match('/\(([^)]+)\)/', $tipo, $matches)) {
-            return $matches[1]; 
-        }
+        if (preg_match('/\(([^)]+)\)/', $tipo, $matches)) return $matches[1]; 
         return null;
     }
-
+    
     static function ValidarNotNull(array $dados = [],array $descricao = []){
         if(empty($dados)) throw new InvalidArgumentException("Dados vazios para validacao!");
         if(empty($descricao)) throw new InvalidArgumentException("Descricao vazia para validacao!");
-        $notnull = array_filter($descricao['resposta'], fn($d) => $d['Null'] === "NO" and $d['Field'] !== "ID");
-        $dadosNotNull = [];
-        foreach($notnull as $nn){
-            $NomeDoNN = $nn['Field'];
-            if(!isset($dados[$NomeDoNN])){
-                $dadosNotNull["Campos faltando que n podem ser nulos"][] = $NomeDoNN;
-            }
-            else if(($dados[$NomeDoNN]) == 0){
-                continue;
-            }
-            else if(empty(trim($dados[$NomeDoNN]))){
-                $dadosNotNull["Campos vazios"][] = $NomeDoNN;
-            }
+        $erros = [];
+        if(isset($dados['ID'])) $erros['ID'] = ["Campo ID e auto_increment!"];
+        foreach($descricao['resposta'] as $DescCampo){
+            if($DescCampo['Field'] == 'ID')continue;
+            if($DescCampo['Null'] == 'YES')continue;
+            if(!isset($dados[$DescCampo['Field']])) $erros['Campos NOT NULL faltando'][] = $DescCampo['Field'];
+            else if(empty(trim($dados[$DescCampo['Field']]))) $erros['Campos NOT NULL Vazio'][] = $DescCampo['Field'];
         }
-        return $dadosNotNull;
+        return $erros;
     }
-    
     
     static function ValidarTamanho(array $dados = [], array $descricao = []): array{
         if (empty($dados))  throw new InvalidArgumentException("Dados vazios para validacao!");
         if (empty($descricao))  throw new InvalidArgumentException("Descricao vazia para validacao!");
         $erros = [];
-
         foreach ($descricao['resposta'] as $coluna) {
             if ($coluna['Field'] === 'ID') continue;
             if (!isset($dados[$coluna['Field']])) continue;
             $tipo = strtoupper($coluna['Type']);
-            if (!preg_match('/^([A-Z]+)\((\d+)\)/', $tipo, $match)) continue; 
+            if (!preg_match('/^([A-Z]+)\((\d+)\)/', $tipo, $match)) continue;
             $max = (int) $match[2];
             $valor = $dados[$coluna['Field']];
-            if (strlen($valor) > $max) {
-                $erros[] = [
-                    'campo' => $coluna['Field'],
-                    'tamanho_recebido' => strlen($valor),
-                    'tamanho_maximo' => $max,
-                ];
-            }
+            if (strlen($valor) > $max)$erros[] = ['campo' => $coluna['Field'],'tamanho_recebido' => strlen($valor),'tamanho_maximo' => $max,];
         }
         return $erros;
     }
