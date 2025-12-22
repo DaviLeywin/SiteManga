@@ -45,7 +45,7 @@ class MangasService {
         return MangasDAO::Put($request, $url);
     }
     
-    static function Delete($request, $url){
+    static function Delete($url){
         return MangasDAO::Delete($url);
     }
 }

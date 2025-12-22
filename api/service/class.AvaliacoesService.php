@@ -45,7 +45,7 @@ class AvaliacoesService {
         return AvaliacoesDAO::Put($request, $url);
     }
     
-    static function Delete($request, $url){
+    static function Delete($url){
         return AvaliacoesDAO::Delete($url);
     }
 }

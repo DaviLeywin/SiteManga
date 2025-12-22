@@ -45,7 +45,7 @@ class FavoritosService {
         return FavoritosDAO::Put($request, $url);
     }
     
-    static function Delete($request, $url){
+    static function Delete($url){
         return FavoritosDAO::Delete($url);
     }
 }

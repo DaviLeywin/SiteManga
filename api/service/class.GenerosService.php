@@ -45,7 +45,7 @@ class GenerosService {
         return GenerosDAO::Put($request, $url);
     }
     
-    static function Delete($request, $url){
+    static function Delete($url){
         return GenerosDAO::Delete($url);
     }
 }

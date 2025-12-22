@@ -45,7 +45,7 @@ class Comentarios_MangaService {
         return Comentarios_MangaDAO::Put($request, $url);
     }
     
-    static function Delete($request, $url){
+    static function Delete($url){
         return Comentarios_MangaDAO::Delete($url);
     }
 }

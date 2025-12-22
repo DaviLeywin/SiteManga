@@ -45,7 +45,7 @@ class AutoresService {
         return AutoresDAO::Put($request, $url);
     }
     
-    static function Delete($request, $url){
+    static function Delete($url){
         return AutoresDAO::Delete($url);
     }
 }

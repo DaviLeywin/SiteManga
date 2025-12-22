@@ -6,6 +6,12 @@ require_once "class.Response.php";
 
 $rotas = new Rotas();
 
+$rotas->get("/GetRankings/{id}","RankingsController@Get");
+$rotas->get("/GetAllRankings","RankingsController@GetTodos");
+$rotas->post("/InsertRanking","RankingsController@Post");
+$rotas->delete("/DeleteRankings/{id}","RankingsController@Delete");
+$rotas->put("/UpdateRankings/{id}","RankingsController@Put"); 
+
 $rotas->get("/GetAutores/{id}","AutoresController@Get");
 $rotas->get("/GetAllAutores","AutoresController@GetTodos");
 $rotas->post("/InsertAutores","AutoresController@Post");

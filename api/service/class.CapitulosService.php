@@ -45,7 +45,7 @@ class CapitulosService {
         return CapitulosDAO::Put($request, $url);
     }
     
-    static function Delete($request, $url){
+    static function Delete($url){
         return CapitulosDAO::Delete($url);
     }
 }

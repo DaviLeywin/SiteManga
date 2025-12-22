@@ -45,7 +45,7 @@ class UsuariosService {
         return UsuariosDAO::Put($request, $url);
     }
     
-    static function Delete($request, $url){
+    static function Delete($url){
         return UsuariosDAO::Delete($url);
     }
 }
