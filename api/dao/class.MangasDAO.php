@@ -1,21 +1,22 @@
 <?php
 class MangasDAO {
     static function GetTodos(){
-        return DAO::Get()->Tabela("mangas")->Execute();            
+        return DAO::Get()->Table("Mangas")->Execute();            
     }   
     static function Get($where){
-        return DAO::Get()->Tabela('mangas')->Where($where)->Execute();
+        return DAO::Get()->Table("Mangas")->Where($where)->Execute();
     }
     static function Post($dados){
-        return DAO::Post()->Tabela("mangas")->Dados($dados)->Execute();
+        return DAO::Post()->Table("Mangas")->Dados($dados)->Execute();
     }
     static function Delete($where){
-        return DAO::Delete()->Tabela("mangas")->Where($where)->Execute();     
+        return DAO::Delete()->Table("Mangas")->Where($where)->Execute();     
     }
     static function Put($dados,$where){
-        return DAO::Put()->Tabela("mangas")->Dados($dados)->Where($where)->Execute();   
+        return DAO::Put()->Table("Mangas")->Dados($dados)->Where($where)->Execute();   
     }
     static function Describe(){
-        return DAO::Describe()->Tabela("mangas")->Execute();   
+        return DAO::Describe()->Table("Mangas")->Execute();   
     }
 }
+

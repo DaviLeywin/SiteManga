@@ -19,7 +19,7 @@ class MangasService {
         $resposta = Services::PriValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"mangas");
+        $resposta = Services::SegValidarTipo($request, $descricao,"Mangas");
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
         $resposta = Services::TerValidarTamanho($request, $descricao);
@@ -36,7 +36,7 @@ class MangasService {
         $resposta = Services::PriValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"mangas",$url);
+        $resposta = Services::SegValidarTipo($request, $descricao,"Mangas",$url);
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
         $resposta = Services::TerValidarTamanho($request, $descricao);

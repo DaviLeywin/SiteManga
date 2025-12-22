@@ -5,11 +5,11 @@ class Response {
             throw new InvalidArgumentException("Mensagem de sucesso obrigatoria!");
         }
         $retorno = [
-            'sucesso' => true,
-            'mensagem' => $mensagem,
+            "sucesso" => true,
+            "mensagem" => $mensagem,
         ];
         if(!empty($resposta)){
-            $retorno['resposta'] = (array) $resposta;
+            $retorno["resposta"] = (array) $resposta;
         }     
         return $retorno;
     }
@@ -19,11 +19,11 @@ class Response {
             throw new InvalidArgumentException("Mensagem de falha obrigatoria!");
         }
         $retorno = [
-            'sucesso' => false,
-            'mensagem' => $mensagem,
+            "sucesso" => false,
+            "mensagem" => $mensagem,
         ];
         if(!empty($resposta)){
-            $retorno['resposta'] = (array) $resposta;
+            $retorno["resposta"] = (array) $resposta;
         }     
         return $retorno;
     }

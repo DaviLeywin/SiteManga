@@ -64,7 +64,20 @@ class Services {
         return null;
     }
     
-    static function ValidarNotNull(array $dados = [],array $descricao = []){
+    static function CampoSobrando(array $dados = [],array $descricao = []):array {
+        if(empty($dados)) throw new InvalidArgumentException("Dados vazios para validacao!");
+        if(empty($descricao)) throw new InvalidArgumentException("Descricao vazia para validacao!");
+        $erro = [];
+        
+        $ArrayField = array_column($descricao['resposta'],'Field');
+        $ArrayAssocField = array_flip($ArrayField);
+
+        $erro = array_diff_key($dados, $ArrayAssocField);
+        return $erro;
+
+    }
+
+    static function PriValidarNotNull(array $dados = [],array $descricao = []){
         if(empty($dados)) throw new InvalidArgumentException("Dados vazios para validacao!");
         if(empty($descricao)) throw new InvalidArgumentException("Descricao vazia para validacao!");
         $erros = [];
@@ -78,7 +91,7 @@ class Services {
         return $erros;
     }
     
-    static function ValidarTamanho(array $dados = [], array $descricao = []): array{
+    static function TerValidarTamanho(array $dados = [], array $descricao = []): array{
         if (empty($dados))  throw new InvalidArgumentException("Dados vazios para validacao!");
         if (empty($descricao))  throw new InvalidArgumentException("Descricao vazia para validacao!");
         $erros = [];
@@ -94,7 +107,7 @@ class Services {
         return $erros;
     }
 
-    static function ValidarTipo(array $dados = [], array $descricao = [],string $tabela = "",array $url = []) :array{
+    static function SegValidarTipo(array $dados = [], array $descricao = [],string $tabela = "",array $url = []) :array{
         if(empty($dados)) throw new InvalidArgumentException("Dados vazios para validacao!");
         if(empty($descricao)) throw new InvalidArgumentException("Descricao vazia para validacao!");
         if(empty($tabela)) throw new InvalidArgumentException("Tabela vazia para validacao!");
@@ -119,50 +132,42 @@ class Services {
             'TIMESTAMP'  =>fn($v) => strtotime($v) !== false,
             'TIME'  =>fn($v) => preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $v),
             'YEAR'  =>fn($v) => is_numeric($v) && (int)$v > 0,
-            'ENUM'  =>fn($v, $opcoes) => str_contains($v, $opcoes, true), 
+            'ENUM'  =>fn($v, $opcoes) => in_array($v, $opcoes, true), 
         ];
-        $dadosInvalidosTipo = [];
-        foreach($descricao['resposta'] as $d){
-            if($d['Key'] == "ID")continue;
-            $tipoBanco = $d['Type'];
-            preg_match('/^([a-zA-Z]+)/', $tipoBanco, $m);
-            $TipoDeDadosSemP = strtoupper($m[0]);
-            $ValorDoParenteses = self::capturaParenteses($tipoBanco);
-            $ValorRecebido = $dados[$d['Field']] ?? null;
-            if(is_null($ValorRecebido))continue;
-            if($d['Key'] == "UNI"){
-                $resposta = DAO::Get()->Tabela($tabela)->Where([$d['Field'] => $ValorRecebido])->Execute();
-                $id = $resposta['resultado']['ID'] ?? "";
-                $id2 = $url['id'] ?? "0";
-                if($id == $id2)continue;
-                else if($resposta['erro'] == false){
-                    $dadosInvalidosTipo[] = [
-                    'valor recebido' => $ValorRecebido,
-                    'campo' => $d['Field'],
-                    'tipo_de_campo' => 'UNIQUE',
-                    'mensagem' => "Ja existe um campo com este valor!"
-                    ];
+
+        $erro = [];
+        foreach($descricao['resposta'] as $DescCampo){
+            $campo = $DescCampo['Field'];
+            if (!array_key_exists($campo, $dados)) continue;
+            $valor = $dados[$campo];
+            $tipo = $DescCampo['Type'];
+            preg_match('/^([a-zA-Z]+)/', $tipo, $res);
+            if($DescCampo['Key'] == "UNI"){
+                $r = DAO::Get()->Tabela($tabela)->Where([$campo =>  $valor])->Execute();
+                if(isset($r['resultado'])){
+                    if(!empty($url)){
+                        if($r['resultado']['ID'] !== $url['id']){
+                            $erro['atualizar'][] = [ 'valor' =>  $valor, 'mensagem' => 'valor UNIQUE ja existe em outra objeto!'];
+                        }
+                    }else{$erro['inserir'][] = ['valor' =>  $valor, 'mensagem' => 'valor UNIQUE ja existe em outra objeto!'];}
                 }
             }
-            if($TipoDeDadosSemP !== 'ENUM'){
-                $valido = $relacoes[$TipoDeDadosSemP]($ValorRecebido);
-                if(!$valido)$dadosInvalidosTipo[] = [
-                    'valor recebido' => $ValorRecebido,
-                    'valore valido' => $TipoDeDadosSemP,
-                ];
+            $tipoBase = strtoupper($res[0]);
+            if(strtoupper($res[0]) !== 'ENUM'){
+                $valido = $relacoes[$tipoBase]($valor);
+                if(!$valido) $erro['tipo errado'][] = ['valor' =>  $valor,'tipo_esperado' => $tipo,];
+            }else {
+                preg_match('/\((.*)\)/', $tipo, $match);
+                preg_match_all("/'([^']+)'/", $match[1], $values);
+                $valido = $relacoes[$tipoBase]($valor, $values[1]);
+                if(!$valido) $erro['enum'][] = ['valor' =>  $valor,'valores_esperados' => $values[1],];
             }
-            else{
-                preg_match_all("/'([^']+)'/", $ValorDoParenteses, $matches);
-                $arrayValido = $matches[1];
-                $valido = $relacoes[$TipoDeDadosSemP]($ValorRecebido,$arrayValido);
-                if(!$valido)$dadosInvalidosTipo[] = [
-                    'valor recebido' => $ValorRecebido,
-                    'valores validos' => $arrayValido
-                ];
-            }
+            
         }
-        return $dadosInvalidosTipo;
+        return $erro;
+
     }
+
 }
 
 class DAO {
@@ -178,9 +183,7 @@ class DAO {
 
     public function init(){
         $this->pdo = Banco::BuscarConexao();
-        if (!$this->pdo) {
-            throw new InvalidArgumentException("me matei n deu!");
-        }
+        if (!$this->pdo) throw new InvalidArgumentException("me matei n deu!");
         return $this->pdo;
     }
 
@@ -200,7 +203,7 @@ class DAO {
         } 
     }
     
-    public function Tabela(string $tabela){
+    public function Table(string $tabela){
         $pdo = $this->init();
         global $ConnB;
         $banco = $GLOBALS['conn']["banco"];
@@ -217,9 +220,7 @@ class DAO {
 
     public function OrderBy(string $campo = null, Ordem $tipo = Ordem::ASC){
         $campo = strtolower($campo);
-        if (!preg_match('/^[a-z0-9_]+$/', $campo)) {
-            throw new InvalidArgumentException("Order by: aceita apenas um campo válido");
-        }
+        if (!preg_match('/^[a-z0-9_]+$/', $campo)) throw new InvalidArgumentException("Order by: aceita apenas um campo válido");
         $this->orderBy = " ORDER BY $campo {$tipo->value};";
         return $this;
     }
@@ -227,21 +228,15 @@ class DAO {
 
     public function GroupBy($groupBy = null){
         $groupBy = strtolower($groupBy);
-        if(!preg_match('/^[a-z0-9_]+$/',$groupBy)){ 
-            throw new InvalidArgumentException("Group by deve conter uma string/campo!");
-        }
+        if(!preg_match('/^[a-z0-9_]+$/',$groupBy))throw new InvalidArgumentException("Group by deve conter uma string/campo!");
         $this->groupBy = " GROUP BY $groupBy;";
         return $this;
     }
 
 
     public function Dados(array $dados = []){
-        if(empty($dados)){
-            throw new InvalidArgumentException("Dados nao podem estar vazios!");
-        } 
-        if(array_is_list($dados)){
-            throw new InvalidArgumentException("Array deve ser associativo!");
-        }
+        if(empty($dados)) throw new InvalidArgumentException("Dados nao podem estar vazios!");
+        if(array_is_list($dados)) throw new InvalidArgumentException("Array deve ser associativo!");
         foreach($dados as $nome => $value){
             $this->dados[$nome] = $value;
         }
@@ -250,9 +245,7 @@ class DAO {
 
 
     public function Where(array $dados = []){
-        if(empty($dados)){
-            throw new InvalidArgumentException("Dados do where nao pode estar vazio!");
-        } 
+        if(empty($dados)) throw new InvalidArgumentException("Dados do where nao pode estar vazio!");
         foreach($dados as $nome => $value){
             $this->wheres[$nome] = $value;
         }
@@ -379,146 +372,135 @@ class DAO {
     }
 }
 
-class Documentos {
+class Documento {
+    public $documento;
+    public $caminho;
+    public $criar;
+    public $tipo;
     
-    static function C_arquivos($completar = true, $caminho = null, $arquivos = [], ...$datas){
-        $dados = $arquivos;
-        if($arquivos == [])$dados = $datas;
-        foreach($dados as $nome){
-            if($caminho and basename(__DIR__) == $caminho){
-                echo "Essa pasta local é a pasta base, nao e necessarios colocal pasta base como local, e nao e permitido criar pasta com o mesmo nome da pasta base</br>";
-            }else if ($caminho){
-                $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR . $caminho;
-                if(!file_exists($pastaLocal)){
-                    echo "Não foi encontrada a pasta de insercao -'$caminho'-</br>" ;
-                } 
-                $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR . $caminho . DIRECTORY_SEPARATOR . $nome;
-                if(file_exists($pastaLocal)){
-                    echo "Arquivo -$nome- já existe!</br>" ;
-                }else{
-                    if(str_ends_with($caminho,"controller") && $completar == true){
-                        $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR . $caminho . DIRECTORY_SEPARATOR ."class.". $nome."Controller.php";
-                        $arquivo = fopen($pastaLocal,"w");
-                        $nomeMS = substr($nome,1);
-                        fwrite($arquivo,"<?php
-require_once __DIR__ . '\..\dao\class.{$nome}DAO.php';
+    static function Local(string $local = ""){
+        $caminho = str_ireplace("/","\\",__DIR__ ."\\". $local);
+        if(!file_exists($caminho)) throw new InvalidArgumentException("Caminho inexistente!");   
+        $inst = new self();
+        $inst->caminho = $caminho;
+        return $inst;
+    }
+    
+    function Pastas(array $pastas):self{
+        if(empty($pastas)) throw new InvalidArgumentException("Campo obrigatorio faltando em Pastas!");
+        $this->criar = 'PASTAS';
+        $this->documento = $pastas;
+        return $this;
+    }
 
-class {$nome}Controller {
-    static function GetTodos(\$request, \$url){
-        return {$nome}DAO::GetTodos();
+    function Arquivos(array $arquivos):self{
+        if(empty($arquivos)) throw new InvalidArgumentException("Campo obrigatorio faltando em Arquivos!");
+        $this->criar = 'ARQUIVOS';
+        $this->documento = $arquivos;
+        return $this;
     }
-    
-    static function Get(\$request, \$url){
-        return {$nome}DAO::Get(\$url);
-    }
-    
-    static function Post(\$request, \$url){
-        return {$nome}DAO::Post(\$request->BODY);
-    }
-    
-    static function Put(\$request, \$url){
-        return {$nome}DAO::Put(\$request->BODY, \$url);
-    }
-    
-    static function Delete(\$request, \$url){
-        return {$nome}DAO::Delete(\$url);
-    }
-}
 
-\$rotas->get('/BuscarNome/{id}','{$nome}Controller@Get');
-\$rotas->get('/Buscar{$nome}','{$nome}Controller@GetTodos');
-\$rotas->post('/InserirNome','{$nome}Controller@Post');
-\$rotas->delete('/DeletarNome/{id}','{$nome}Controller@Delete');
-\$rotas->put('/AtualizarNome/{id}','{$nome}Controller@Put');    
-"
-                        );
-                    }
-                    else if(str_ends_with($caminho,"dao") && $completar == true){
-                        $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR . $caminho . DIRECTORY_SEPARATOR ."class.". $nome."DAO.php";
-                        $arquivo = fopen($pastaLocal,"w");
-                        $nomeD = strtolower($nome);
-                        fwrite($arquivo,"<?php
-class {$nome}DAO {
-    static function GetTodos(){
-        return DAO::Get()->Tabela('{$nomeD}')->Execute();            
-    }   
-    static function Get(\$where){
-        return DAO::Get()->Tabela('{$nomeD}')->Where(\$where)->Execute();
+    function Tipo(string $tipo){
+        if(empty($tipo)) throw new InvalidArgumentException("Campo tipo nao pode estar vazio!");   
+        if(in_array(strtolower($tipo), ['htaccess','dao','controller','service','banco','rota','request','response','index'])){
+            $this->tipo = strtolower($tipo);
+            return $this;
+        }
+        throw new InvalidArgumentException("Tipo invalido! tipos validos: service, daoe controller.");
     }
-    static function Post(\$dados){
-        return DAO::Post()->Tabela('{$nomeD}')->Dados(\$dados)->Execute();
-    }
-    static function Delete(\$where){
-        return DAO::Delete()->Tabela('{$nomeD}')->Where(\$where)->Execute();     
-    }
-    static function Put(\$dados,\$where){
-        return DAO::Put()->Tabela('{$nomeD}')->Dados(\$dados)->Where(\$where)->Execute();   
-    }
-}");
-                    }
-                    else{ $arquivo = fopen($pastaLocal,"w");}
-                    if(str_ends_with(basename($pastaLocal),".php") && !str_ends_with(basename($pastaLocal),"Controller.php") && !str_ends_with(basename($pastaLocal),"DAO.php")){
-                        fwrite($arquivo,"<?php");
-                    }
-                    if(str_ends_with(basename($pastaLocal),"htaccess")){
-                        fwrite($arquivo,"RewriteEngine On RewriteCond %{REQUEST_FILENAME} !-f RewriteCond %{REQUEST_FILENAME} !-d RewriteRule ^(.*)$ index.php [QSA,L]");
-                    }
-                    echo "Arquivo -$nome- criada com sucesso! </br>" ;
-                }
-            }else {
-                $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR . $nome;
-                if(file_exists($pastaLocal)){
-                    echo "Arquivo -$nome- já existe! </br>" ;
-                }else{
-                    if(str_ends_with($caminho,"controller")){
-                        $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR ."class.". $nome."Controller.php";
-                        $arquivo = fopen($pastaLocal,"w");
-                    }
-                    else if(str_ends_with($caminho,"dao")){
-                        $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR ."class.". $nome."DAO.php";
-                        $arquivo = fopen($pastaLocal,"w");
-                    }
-                    else{ $arquivo = fopen($pastaLocal,"w");}
-                    if(str_ends_with(basename($pastaLocal),".php")){
-                        fwrite($arquivo,"<?php");
-                    }
-                    if(str_ends_with(basename($pastaLocal),"htaccess")){
-                        fwrite($arquivo,"RewriteEngine On RewriteCond %{REQUEST_FILENAME} !-f RewriteCond %{REQUEST_FILENAME} !-d RewriteRule ^(.*)$ index.php [QSA,L]");
 
-                    }
-                    echo "Arquivo -$nome- criada com sucesso! </br>" ;
-                }
+    function CriarPastas(){
+        $erro = [];
+        foreach($this->documento as $pasta){
+            if(file_exists($this->caminho.DIRECTORY_SEPARATOR . $pasta)){
+                $erro[] = "Pasta $pasta ja existe nesse local!";
+            }else if(!file_exists($this->caminho.DIRECTORY_SEPARATOR . $pasta)){
+                mkdir($this->caminho.DIRECTORY_SEPARATOR . $pasta);
+                $erro[] = "Pasta $pasta criada com sucesso!";
             }
         }
+        return $erro;
     }
-    static function C_pastas($caminho = null, $pastas = [], ...$datas){
-        $dados = $pastas;
-        if($pastas == [])$dados = $datas;
-        foreach($dados as $nome){
-            if($caminho and basename(__DIR__) == $caminho){
-                echo "Essa pasta local é a pasta base, nao e necessarios colocal pasta base como local, e nao e permitido criar pasta com o mesmo nome da pasta base</br>";
-            }else if ($caminho){
-                $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR . $caminho;
-                if(!file_exists($pastaLocal)){
-                    echo "Não foi encontrada a pasta de insercao -'$caminho'-</br>" ;
-                } 
-                $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR . $caminho . DIRECTORY_SEPARATOR . $nome;
-                if(file_exists($pastaLocal)){
-                    echo "Pasta -$nome- já existe!</br>" ;
-                }else{
-                    mkdir($pastaLocal);
-                    echo "Pasta -$nome- criada com sucesso! </br>" ;
-                }
-            }else {
-                $pastaLocal = __DIR__ . DIRECTORY_SEPARATOR . $nome;
-                if(file_exists($pastaLocal)){
-                    echo "Pasta -$nome- já existe! </br>" ;
-                }else{
-                    mkdir($pastaLocal);
-                    echo "Pasta -$nome- criada com sucesso! </br>" ;
-                }
+
+    function CriarArquivos(){
+        $dados = [];
+        foreach($this->documento as $arquivo1){
+            if(file_exists($this->caminho.DIRECTORY_SEPARATOR . $arquivo1)){
+                $erro[] = "Arquivo $arquivo1 ja existe nesse local!";
+                continue;
             }
+            if($this->tipo){
+                if($this->tipo == 'controller'){
+                    $arquivo = "class." . $arquivo1 . "Controller.php";
+                    $arquivo = $this->caminho . DIRECTORY_SEPARATOR . $arquivo; 
+                    $texto = $this->ArquivosDados('controller',$arquivo1);
+                    $arquivo = fopen($arquivo,"w");
+                    fwrite($arquivo,$texto);
+                }
+                else if($this->tipo == 'dao'){
+                    $arquivo = "class." . $arquivo1 . "DAO.php";
+                    $arquivo = $this->caminho . DIRECTORY_SEPARATOR . $arquivo; 
+                    $texto = $this->ArquivosDados('dao',$arquivo1);
+                    $arquivo = fopen($arquivo,"w");
+                    fwrite($arquivo,$texto);
+                }
+                else if($this->tipo == 'service'){
+                    $arquivo = "class." . $arquivo1 . "Service.php";
+                    $arquivo = $this->caminho . DIRECTORY_SEPARATOR . $arquivo;
+                    $texto = $this->ArquivosDados('service',$arquivo1);
+                    $arquivo = fopen($arquivo,"w");
+                    fwrite($arquivo,$texto);
+                }else{
+                    $arquivo = $this->caminho . DIRECTORY_SEPARATOR . $arquivo1;
+                    $texto = $this->ArquivosDados($this->tipo,$arquivo1);
+                    $arquivo = fopen($arquivo,"w");
+                    fwrite($arquivo,$texto);
+                }
+            }else{
+                $arquivo = $this->caminho . DIRECTORY_SEPARATOR . $arquivo1; 
+                fopen($arquivo,"w");
+            }
+            $dados[] = "Arquivo $arquivo1 criado com sucesso!";
+
+        }
+        return $dados;
+    }
+
+    function Exec(){
+        if(empty($this->criar)) throw new InvalidArgumentException("Nenhum documento definido para criacao!");
+        if(empty($this->caminho)) throw new InvalidArgumentException("Caminho nao definido para criacao!");
+        if(empty($this->documento)) throw new InvalidArgumentException("Nenhum documento definido para criacao!");
+        if($this->criar == 'ARQUIVOS'){
+            return $this->CriarArquivos();
+        }
+        else if($this->criar == 'PASTAS'){
+            return $this->CriarPastas();
         }
     }
+
+    function ArquivosDados(string $tipo, string $arquivo):string{
+        $relacoes = [
+            'controller' => "eJzFkstOwzAQRfeR8g+D1UUiQT6g4SFBBGIFKt0gUlkmnQpLxg5+VAKUfyep0+Ii+lhQMRvL9szcc8c+vahfaogjjW+Oa6RKVgiUFrcjSiEDUmZZaVDPeYVlJZgx2Zg9o2AP/ixrq0keR3G0uAR/eaWk1UoI1PAZR9CGsczyCmZOVpYrCTdox2qqTDLohNHYYxg4LdI+vQuN1mkJa3LD4aowzX1q45eNMlsUuv0T4VMygTNIuLRpcJTvQZIsOi5BPMbvIPfKbCPhswRfa/u+Sjk5v7wrHtMwJyAZoamVNC3ENeMiIQVrJwJz9sGVOSJpgN7scrEG1qt+T3aDGfcXU/1Hz+6n5d7FPi9ZoECLB/tVy/YhThw1X7SwDeo=",
+            'dao' => "eJyVk19rwjAUxd8Fv0MIPrSg9N0NN1mH7Gl7cOw5NtdZCEnJHxyI3303bepa1hpN+xDKOfeXm3v6+FQdqumkEMwYsmU7ECxfv5PTdEJwGctsWZC9k4UtlSQbsFvFlUnSIPBLg3VaErQtlyhI0sUKCwlIaFOP4ofXHyichSR9IJ3V1DhfdgO4ZHY8gIZ7eV/e1Hq7+IAc5n0og0DOsMMxYC0ZIube1ZpvJuYgwEKkySC6q8/u/Y4069pe59fxXnhDx9eOErkDU+hyB6Oh+hPEknXh4OufmVaWmcXqG2NCM5/e2pedSn6m81DlRUmrlRCgn1FB/cT++dZCBOSwq/4retbKB4Vmb9KAtuNen6eejzfDplkz9ciBG1Ef7Dz3s+Is6sbJopX8AkL7NU8=",
+            'service' => "eJztlUFPgzAUx+8kfIdKdmAJ4QMwjTGixstcNuJpCenKm2vStdiWxcTsu1sobEymm3MHD74LSfve7/37yh8ur/NFjlxHwmtBJaSCE0BpGj+O0xSFyJuG4TTDYkoYVipM8AwYjm+eQlPlDVzHdaoNZDcmIFfU1L+7DjKhNNaUoHnBiaaCowfQiciE8vt1QhkSdCE52pCjaJs2sGlr+/gS6vcKyQ4ybdYWuR83EspkltMApdvMXgaKSEqwQFdtclwtz6BS20qXoHLDwia7HouKolu8zMVEzCTmmdi0CVrwRmAZdO5vMP3mUONygSuIontMme9VSIXgTUusLrxgW9EiHdI1kvQZM5phORR6WDB2Hm13UgpkBraybESsVm6WeMHEyXIn8FLLTWi+f46BZ+/I+7VobVog8zrW6k+UnIBsJOMl5osz3X5HrIX/RG/XLLseOOiYQrfP8smKR9nm3zR/zDRB+1v575zjndP1wjH/sBgYaPjGRd1OTclui/UH8ohjAA==",
+            'banco' => 'eJztVt9v2jAQfkfif/AsHoJE6esUBlUg2YREC0vyUKmqImMOiAQ22I7aauJ/r+NEKAkprTZW7WERUsj98Hd339nnbze79a7ZELBPYgERZxRQFLljP4pQF+HrbveacraMV/mrq81xr9loNuiGSImGhFGOfjUbSD9SERVT1NoteK8skftNRRIzCUJVhGsuqyIJbE0qskQmRMRVjHkaigmtIF0mjKqYMxSzWFntPFBjAJulbRtI1EetH5Pp0JkED1jnyfDjA04V+LF34mACqvUwmjqXPN5ap1xX52YSqnUymtrg9puSg/6uM8uKX7LMREfjw1t1HImYCMN6TTWzIhfwlHgpGKVPK81BIzN4QjN3auHtiw7STqvdx90CKV3co2siJKh+opZfcadczE6JjyLmEeVqoJ0dpUQ8TxRYGs22nTD0I8/3b6eu10FGlH9F3v3Im4Xj6V27V1yqsnBWYTzyPSf0kOuEztAJPDT+ju6mIfLux0EYoGMihiidCa6PD56BWumS1fgFqEQw5IPccU2MbQcJpSClhbMNRzULC/3iWySTVMG/4OIaB0oUXVveM4Wdoa0F7QoRai34k6HBJYrMiYSjtYU9ITgiGY4wMByZXGydWwuuBitQtxqWrMBql4DfaR8XNqD+NxDCrj+dldrns1qH7MjqI71z0hW/20MG8KJNNEwkJWLEGTyTT+iixZyRLfTLzPwb3ZSTbdb/G9tfl5iqy5JnBkiw39QNY31x0JxkHxWSz7K55AKITrgwBYk0W62adhnszDY6nEXIB2gKkv39GE5u+zbUZc/t4OfkT9nygZ4b+OXj/OSiUbws1CtNIxRU751eAs6NPp2G/t0MXgH8C/1r',
+            'rota' => 'eJylVe9O2zAQ/47EOxgTiUTLmiFtXyiFsZFtaCBYWpBQCJZJr220NMkch3Wq+jR7lL3Yzk5S0jaID1iVGt+/39n3u/PhcTbJtrcE/CoiAYSGMc/zjodbyGUHdbS71LI0CZVJmkiRxjEIp7Q+KeTk81JYO21vaS3xUsnz+fYWwZUVD3EUEkMombZR0lGRhDJKE8IYxs6lKEJpWnNiyEmUvz3SxqRH/KBLFhs+Y5CmUYjYJgYPeUpsI0MHGEdDjj4jHudgzatIfDhs2tqEfnUHtOlidRdr8bM0fw3A1WX/RYTiVQDXL8UfQgwSXgFx6p67A3cTZQ1nw9GYgkyHiEYacEscXVY/QPwwnWYcS07RmdpUOeNf6YwfS1/ahgozCAvJBRKm1KhliJLAGDyB36Sis2l1GyZVcj1isL7r3bieTz33x7XbH7ALd/Dt8pQGTXPM7RPPAe2p048kXPBkzB2eRXTNCi2Qwgz7JYt5WN678rQptTehrr0zGjTzchwiQBYi0cE2Y5d/KgtKjsvdARFSRNPy8lHeDDdKBfBwYq70Ev50CzavTK1oZGq5X19+QHZ69U1ZRDV+lBTQfc7rqVLBemh9gkceo1IRsEdWh8bBwY3WiUH6E5KVQjVhlgF8CkKk7TBqTaTMmIA8w3kCOFWGYL5/t98WVq36wpfhn7GDWSRbVItV0doWuTiGmeLN7j3tZLhjFTVYyOP4gYc/TTTbc+7mpn9/twjeWHcLZw+7pua4aUxxGlZJUvP46pB2jKm/H3TokX/voAPtLlSXlVVQXRRYHWrs0s1Kafwpl4oSOjGbVD2bccGx0iLNrdbiPenxLFwI/oeNoliCMBsqe4TZhhP+CBbpHZGdKGdRImuRfeJ5J7fsy9n5wPXYdd9l393btqL4xtMjY1f8U5MCZlmsakk/Yi+Vp9XTImgLsvpqdZyNd6sBUj9azzBDFYoVOQimasL06c3WJG1SFkCdvnkvtJpIpaLatKbdQrIGoxqfrRz/0AxZZV81i0LGtxXUaE1yPoapFlH1QJPk39+UQKJPxLGB7Xr4ISD+/gNl+1Wu',
+            'response' => 'eJzVkb9OwzAQh/dKfYer1cGR+galrRhAYmCBsYqQ6zqJkWNHPptSAe/OOcq/AiMDnKIokX/58t3d1a6pmvlMGoEIDwobZ1HB23wGVBhE0BKKaGXQzsJjlFIhcgxe2xKWtbIoSlXDBmw0ZgXCe3F+d4dnJQMsfcIRg473edYxU+mCa3xKn/CBkU0DqULl3QmsOsGdfRFGH699GSkdbl6lapIPZ/e9wFEBxuTmwB28LkVwXosFy9Yj9GN8JDUKWJfMLv/KOgyDzRaCj2r15bz3bQOD/SSVry8aXai6CWc+DONbn73LnvURlpMXb2eZjVOcdtLex3ciRG8HUpekfn9e463Q5m/usBCmEr+5QQLi/14hXbvtJ+SFBcY=',
+            'request' => 'eJxtkV9LwzAUxd8H+w53ow8NVPY+rUNRfJyoLyISYna7RbI05g8ypN/dpO3W0O2+JNx7cvLLyc1K7/R0wiWzFl7wx6N18DedQCjtv6TgANmdlFDCx+f1qH+/fni/OHh6fLvYf16/ngbdqPKKO1EroJTXyjrjuctJDxArczthr247x4zGdbWEwTvR9O4ZbTcnVaIz7DcIKiGRbtHFGx0qZ/N5CGG5WAilvZuT1PnbBrYS4kI3yOsN5tGlgECKqVJUkHfqWVmC8lISSJ6RYPapteLEoEFp8fwI7nUa5bE0MxZpyKvHaYVkJIpMs9B3h7ybkxFCbKYIZ5F2P8+MYQe6R7MNrx+yLoa/KRLjI0UTo2/+AcTPm20=',
+            "htaccess" => "eJwLSi0vyixJdc1Lz8xLVfDP4+UKgog45+elKKhWB7kGhroGh8S7efq4+jn6utYqKOqmEaMoBa4oqDQnVSFOQ09LU0UhMy8ltUKvIKNAITow2FHHJxYAgOUogQ==",
+            "index" => "eJx9jD0LwjAURfdC/0MoDslgwLlWlyK4di6EkF5o/UjieynVf29bcXGQO95zzv4Y+5hnHdzNEiQnGlwy6RXB1U6VeUZ4jAPBBO8gjKnPjTFCi6LVuj2RvWMKdNVzpPiFiznJrJuQLP8FwDF4xpfJsw0tjqiExyRWX6r1WAbXB3Hh4A28Cx3kh94e8IQbkyWpVPkGSyZGUw==",
+        ];
+        if(in_array($tipo, ['controller','dao','service'])){
+            $str = $relacoes[$tipo];
+            $original = gzuncompress(base64_decode($str));
+            $original = str_replace("Tabela",$arquivo,$original);
+            return $original;
+        }else if(in_array($tipo, ['htaccess','banco','rota','request','response','index'])){
+            $str = $relacoes[$tipo];
+            $original = gzuncompress(base64_decode($str));
+            return $original;
+        }
+    }
+
 }
 ?>

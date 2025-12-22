@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . "/../config/config.php";
 
 class Banco {
     static $pdo;
@@ -11,12 +11,12 @@ class Banco {
     static $banco;
 
     static function init(){
-        self::$host = $GLOBALS['conn']['host'];
-        self::$senha = $GLOBALS['conn']['senha'];
-        self::$usuario = $GLOBALS['conn']['usuario'];
-        self::$banco = $GLOBALS['conn']['banco'];
-        self::$sql = $GLOBALS['sql'];
-        self::$insert = $GLOBALS['insert'];
+        self::$host = $GLOBALS["conn"]["host"];
+        self::$senha = $GLOBALS["conn"]["senha"];
+        self::$usuario = $GLOBALS["conn"]["usuario"];
+        self::$banco = $GLOBALS["conn"]["banco"];
+        self::$sql = $GLOBALS["sql"];
+        self::$insert = $GLOBALS["insert"];
     }
 
     static function CriarBanco(){

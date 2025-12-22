@@ -1,17 +1,17 @@
 <?php 
-require_once __DIR__ . "\..\dao\class.MangasDAO.php";
+require_once __DIR__ . "\..\dao\class.FavoritosDAO.php";
 
-class MangasService {
+class FavoritosService {
     static function GetTodos(){
-        return MangasDAO::GetTodos();
+        return FavoritosDAO::GetTodos();
     }
     
     static function Get($url){
-        return MangasDAO::Get($url);
+        return FavoritosDAO::Get($url);
     }
 
     static function Post($request){
-        $descricao = MangasDAO::Describe();
+        $descricao = FavoritosDAO::Describe();
 
         $resposta = Services::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
@@ -19,33 +19,33 @@ class MangasService {
         $resposta = Services::PriValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"mangas");
+        $resposta = Services::SegValidarTipo($request, $descricao,"Favoritos");
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
         $resposta = Services::TerValidarTamanho($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return MangasDAO::Post($request);
+        return FavoritosDAO::Post($request);
     }
 
     static function Put($request, $url){
-        $descricao = MangasDAO::Describe();
+        $descricao = FavoritosDAO::Describe();
         $resposta = Services::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
         $resposta = Services::PriValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"mangas",$url);
+        $resposta = Services::SegValidarTipo($request, $descricao,"Favoritos",$url);
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
         $resposta = Services::TerValidarTamanho($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return MangasDAO::Put($request, $url);
+        return FavoritosDAO::Put($request, $url);
     }
     
     static function Delete($request, $url){
-        return MangasDAO::Delete($url);
+        return FavoritosDAO::Delete($url);
     }
 }

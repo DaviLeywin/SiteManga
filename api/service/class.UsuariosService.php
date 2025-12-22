@@ -1,17 +1,17 @@
 <?php 
-require_once __DIR__ . "\..\dao\class.MangasDAO.php";
+require_once __DIR__ . "\..\dao\class.UsuariosDAO.php";
 
-class MangasService {
+class UsuariosService {
     static function GetTodos(){
-        return MangasDAO::GetTodos();
+        return UsuariosDAO::GetTodos();
     }
     
     static function Get($url){
-        return MangasDAO::Get($url);
+        return UsuariosDAO::Get($url);
     }
 
     static function Post($request){
-        $descricao = MangasDAO::Describe();
+        $descricao = UsuariosDAO::Describe();
 
         $resposta = Services::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
@@ -19,33 +19,33 @@ class MangasService {
         $resposta = Services::PriValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"mangas");
+        $resposta = Services::SegValidarTipo($request, $descricao,"Usuarios");
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
         $resposta = Services::TerValidarTamanho($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return MangasDAO::Post($request);
+        return UsuariosDAO::Post($request);
     }
 
     static function Put($request, $url){
-        $descricao = MangasDAO::Describe();
+        $descricao = UsuariosDAO::Describe();
         $resposta = Services::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
         $resposta = Services::PriValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"mangas",$url);
+        $resposta = Services::SegValidarTipo($request, $descricao,"Usuarios",$url);
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
         $resposta = Services::TerValidarTamanho($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return MangasDAO::Put($request, $url);
+        return UsuariosDAO::Put($request, $url);
     }
     
     static function Delete($request, $url){
-        return MangasDAO::Delete($url);
+        return UsuariosDAO::Delete($url);
     }
 }
