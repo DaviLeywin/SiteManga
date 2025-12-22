@@ -19,18 +19,9 @@ class Rotas{
         $metodo = $_SERVER["REQUEST_METHOD"];
         $urlBase = "/SiteManga/api";
         $url = str_ireplace($urlBase,"",$_SERVER["REQUEST_URI"]);
-        // return $url;
         $url = $url == "/" ? $url : rtrim($url,"/");
         foreach($this->rotas as $rota){
             if($rota["metodo"] != $metodo) continue;
-            if($rota["protegida"]){
-                $validacao = AuthController::ValidarToken();
-                if($validacao["erro"]){
-                    http_response_code(401);
-                    return $validacao;
-                    exit;
-                }
-            }
             $regex = "#^".preg_replace_callback(   '/\{([^\}]+)\}/' , function($m){ return "(?P<".$m[1].">[^/]+)";} , $rota["url"])."$#";
             if(preg_match($regex, $url, $parametros)){
                 $parametros = array_filter($parametros,fn($chave) => !is_int($chave),ARRAY_FILTER_USE_KEY);

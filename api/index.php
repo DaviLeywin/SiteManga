@@ -59,5 +59,4 @@ $rotas->get("/GetAllUsuarios","UsuariosController@GetTodos");
 $rotas->post("/InsertUsuarios","UsuariosController@Post");
 $rotas->delete("/DeleteUsuarios/{id}","UsuariosController@Delete");
 $rotas->put("/UpdateUsuarios/{id}","UsuariosController@Put"); 
-
 echo json_encode($rotas->executar());

@@ -20,9 +20,3 @@ class Comentarios_MangaDAO {
     }
 }
 
-
-$rotas->get("/GetComentarios_Manga/{id}","Comentarios_MangaController@Get");
-$rotas->get("/GetAllComentarios_Manga","Comentarios_MangaController@GetTodos");
-$rotas->post("/InsertComentarios_Manga","Comentarios_MangaController@Post");
-$rotas->delete("/DeleteComentarios_Manga/{id}","Comentarios_MangaController@Delete");
-$rotas->put("/UpdateComentarios_Manga/{id}","Comentarios_MangaController@Put"); 
