@@ -1,5 +1,7 @@
 <?php 
+require_once __DIR__ . "\..\model\class.RankingsModel.php";
 require_once __DIR__ . "\..\dao\class.RankingsDAO.php";
+require_once __DIR__ . '\..\validator\class.BaseValidator.php';
 
 class RankingsService {
     static function GetTodos(){
@@ -13,33 +15,35 @@ class RankingsService {
     static function Post($request){
         $descricao = RankingsDAO::Describe();
 
-        $resposta = Services::CampoSobrando($request, $descricao);
+        $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
-        $resposta = Services::PriValidarNotNull($request, $descricao);
+        $resposta = BaseValidator::ValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"Rankings");
+        $resposta = BaseValidator::ValidarTipoArray($request, $descricao,"Rankings");
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
-        $resposta = Services::TerValidarTamanho($request, $descricao);
+        $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return RankingsDAO::Post($request);
+        $Rankings = new Rankings();
+
+        return RankingsDAO::Post($Rankings);
     }
 
     static function Put($request, $url){
         $descricao = RankingsDAO::Describe();
-        $resposta = Services::CampoSobrando($request, $descricao);
+        $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
-        $resposta = Services::PriValidarNotNull($request, $descricao);
+        $resposta = BaseValidator::ValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"Rankings",$url);
+        $resposta = BaseValidator::ValidarTipoArray($request, $descricao,"Rankings",$url);
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
-        $resposta = Services::TerValidarTamanho($request, $descricao);
+        $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
         return RankingsDAO::Put($request, $url);

@@ -1,5 +1,4 @@
 <?php
-// require_once __DIR__ . "\..\model\class.MangasModel.php";
 
 class MangasDAO {
     static function GetTodos(){
@@ -9,17 +8,17 @@ class MangasDAO {
         return DAO::Get()->Table("Mangas")->Where($where)->Execute();
     }
     static function Post(Mangas $dados){
-        return $dados;
         return DAO::Post()->Table("Mangas")->Dados($dados)->Execute();
     }
     static function Delete($where){
         return DAO::Delete()->Table("Mangas")->Where($where)->Execute();     
     }
-    static function Put($dados,$where){
+    static function Put(Mangas $dados,$where){
         return DAO::Put()->Table("Mangas")->Dados($dados)->Where($where)->Execute();   
     }
     static function Describe(){
         return DAO::Describe()->Table("Mangas")->Execute();   
     }
 }
+
 

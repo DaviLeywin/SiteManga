@@ -1,5 +1,7 @@
 <?php 
+require_once __DIR__ . "\..\model\class.FavoritosModel.php";
 require_once __DIR__ . "\..\dao\class.FavoritosDAO.php";
+require_once __DIR__ . '\..\validator\class.BaseValidator.php';
 
 class FavoritosService {
     static function GetTodos(){
@@ -13,33 +15,35 @@ class FavoritosService {
     static function Post($request){
         $descricao = FavoritosDAO::Describe();
 
-        $resposta = Services::CampoSobrando($request, $descricao);
+        $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
-        $resposta = Services::PriValidarNotNull($request, $descricao);
+        $resposta = BaseValidator::ValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"Favoritos");
+        $resposta = BaseValidator::ValidarTipoArray($request, $descricao,"Favoritos");
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
-        $resposta = Services::TerValidarTamanho($request, $descricao);
+        $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return FavoritosDAO::Post($request);
+        $Favoritos = new Favoritos();
+
+        return FavoritosDAO::Post($Favoritos);
     }
 
     static function Put($request, $url){
         $descricao = FavoritosDAO::Describe();
-        $resposta = Services::CampoSobrando($request, $descricao);
+        $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
-        $resposta = Services::PriValidarNotNull($request, $descricao);
+        $resposta = BaseValidator::ValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"Favoritos",$url);
+        $resposta = BaseValidator::ValidarTipoArray($request, $descricao,"Favoritos",$url);
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
-        $resposta = Services::TerValidarTamanho($request, $descricao);
+        $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
         return FavoritosDAO::Put($request, $url);

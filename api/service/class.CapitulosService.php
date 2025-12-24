@@ -1,5 +1,7 @@
 <?php 
+require_once __DIR__ . "\..\model\class.CapitulosModel.php";
 require_once __DIR__ . "\..\dao\class.CapitulosDAO.php";
+require_once __DIR__ . '\..\validator\class.BaseValidator.php';
 
 class CapitulosService {
     static function GetTodos(){
@@ -13,33 +15,35 @@ class CapitulosService {
     static function Post($request){
         $descricao = CapitulosDAO::Describe();
 
-        $resposta = Services::CampoSobrando($request, $descricao);
+        $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
-        $resposta = Services::PriValidarNotNull($request, $descricao);
+        $resposta = BaseValidator::ValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"Capitulos");
+        $resposta = BaseValidator::ValidarTipoArray($request, $descricao,"Capitulos");
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
-        $resposta = Services::TerValidarTamanho($request, $descricao);
+        $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return CapitulosDAO::Post($request);
+        $Capitulos = new Capitulos();
+
+        return CapitulosDAO::Post($Capitulos);
     }
 
     static function Put($request, $url){
         $descricao = CapitulosDAO::Describe();
-        $resposta = Services::CampoSobrando($request, $descricao);
+        $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
-        $resposta = Services::PriValidarNotNull($request, $descricao);
+        $resposta = BaseValidator::ValidarNotNull($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar campos nao nulos!",$resposta);
         
-        $resposta = Services::SegValidarTipo($request, $descricao,"Capitulos",$url);
+        $resposta = BaseValidator::ValidarTipoArray($request, $descricao,"Capitulos",$url);
         if($resposta) return Response::Fail("Erro ao validar tipo dos campos",$resposta);
         
-        $resposta = Services::TerValidarTamanho($request, $descricao);
+        $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
         return CapitulosDAO::Put($request, $url);

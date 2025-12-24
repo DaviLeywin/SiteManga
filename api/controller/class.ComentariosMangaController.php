@@ -1,21 +1,21 @@
 <?php 
-require_once __DIR__ . "\..\service\class.Generos_MangasService.php";
+require_once __DIR__ . "\..\service\class.ComentariosMangaService.php";
 
-class Generos_MangasController {
+class ComentariosMangaController {
     static function GetTodos($request, $url){
-        return Generos_MangasService::GetTodos();
+        return ComentariosMangaService::GetTodos();
     }
     
     static function Get($request, $url){
         $url["id"] = (int) $url["id"];
-        return Generos_MangasService::Get($url);
+        return ComentariosMangaService::Get($url);
     }    
 
     static function Post($request, $url){
         if(empty($request->BODY)){
             return Response::Fail("Dados vazios!");
         }
-        return Generos_MangasService::Post($request->BODY);
+        return ComentariosMangaService::Post($request->BODY);
     }
 
     static function Put($request, $url){
@@ -23,11 +23,11 @@ class Generos_MangasController {
         if(empty($request->BODY)){
             return Response::Fail("Dados vazios!");
         }
-        return Generos_MangasService::Put($request->BODY, $url);
+        return ComentariosMangaService::Put($request->BODY, $url);
     }    
 
     static function Delete($request, $url){
         $url["id"] = (int) $url["id"];
-        return Generos_MangasService::Delete($url);
+        return ComentariosMangaService::Delete($url);
     }
 }

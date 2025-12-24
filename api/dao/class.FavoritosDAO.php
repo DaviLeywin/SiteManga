@@ -1,4 +1,5 @@
 <?php
+
 class FavoritosDAO {
     static function GetTodos(){
         return DAO::Get()->Table("Favoritos")->Execute();            
@@ -6,17 +7,18 @@ class FavoritosDAO {
     static function Get($where){
         return DAO::Get()->Table("Favoritos")->Where($where)->Execute();
     }
-    static function Post($dados){
+    static function Post(Favoritos $dados){
         return DAO::Post()->Table("Favoritos")->Dados($dados)->Execute();
     }
     static function Delete($where){
         return DAO::Delete()->Table("Favoritos")->Where($where)->Execute();     
     }
-    static function Put($dados,$where){
+    static function Put(Favoritos $dados,$where){
         return DAO::Put()->Table("Favoritos")->Dados($dados)->Where($where)->Execute();   
     }
     static function Describe(){
         return DAO::Describe()->Table("Favoritos")->Execute();   
     }
 }
+
 

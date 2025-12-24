@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . "/../config/config.php";
+require_once __DIR__ . "/../class.Response.php";
 
 class Banco {
     static $pdo;
@@ -77,4 +78,5 @@ class Banco {
         return Response::Success("Banco recriado com sucesso!");
     }
 }
+// echo json_encode(Banco::RecriarBanco());
 ?>

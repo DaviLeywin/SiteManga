@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '\..\validator\class.FavoritosValidator.php';
+require_once __DIR__ . '\..\validator\class.GenerosMangasValidator.php';
 require_once __DIR__ . '\..\validator\class.BaseValidator.php';
 
 
-class Favoritos {
+class GenerosMangas {
     public string $campo;
     
     function AlterarCampo(string $Campo){

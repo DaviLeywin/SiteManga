@@ -400,7 +400,7 @@ class Documento {
 
     function Tipo(string $tipo){
         if(empty($tipo)) throw new InvalidArgumentException("Campo tipo nao pode estar vazio!");   
-        if(in_array(strtolower($tipo), ['htaccess','dao','controller','service','banco','rota','request','response','index'])){
+        if(in_array(strtolower($tipo), ['model','htaccess','dao','controller','service','banco','rota','request','response','index'])){
             $this->tipo = strtolower($tipo);
             return $this;
         }
@@ -448,6 +448,13 @@ class Documento {
                     $texto = $this->ArquivosDados('service',$arquivo1);
                     $arquivo = fopen($arquivo,"w");
                     fwrite($arquivo,$texto);
+                }
+                else if($this->tipo == 'model'){
+                    $arquivo = "class." . $arquivo1 . "Model.php";
+                    $arquivo = $this->caminho . DIRECTORY_SEPARATOR . $arquivo;
+                    $texto = $this->ArquivosDados('model',$arquivo1);
+                    $arquivo = fopen($arquivo,"w");
+                    fwrite($arquivo,$texto);
                 }else if(in_array($this->tipo , ['htaccess','banco','rota','request','response','index'])){
                     $arquivo = $this->caminho . DIRECTORY_SEPARATOR . $arquivo1;
                     $texto = $this->ArquivosDados($this->tipo,$arquivo1);
@@ -481,21 +488,24 @@ class Documento {
     function ArquivosDados(string $tipo, string $arquivo):string{
         $relacoes = [
             'controller' => "eJzFkstOwzAQRfeR8g+D1UUiQT6g4SFBBGIFKt0gUlkmnQpLxg5+VAKUfyep0+Ii+lhQMRvL9szcc8c+vahfaogjjW+Oa6RKVgiUFrcjSiEDUmZZaVDPeYVlJZgx2Zg9o2AP/ixrq0keR3G0uAR/eaWk1UoI1PAZR9CGsczyCmZOVpYrCTdox2qqTDLohNHYYxg4LdI+vQuN1mkJa3LD4aowzX1q45eNMlsUuv0T4VMygTNIuLRpcJTvQZIsOi5BPMbvIPfKbCPhswRfa/u+Sjk5v7wrHtMwJyAZoamVNC3ENeMiIQVrJwJz9sGVOSJpgN7scrEG1qt+T3aDGfcXU/1Hz+6n5d7FPi9ZoECLB/tVy/YhThw1X7SwDeo=",
-            'dao' => "eJyVk19rwjAUxd8Fv0MIPrSg9N0NN1mH7Gl7cOw5NtdZCEnJHxyI3303bepa1hpN+xDKOfeXm3v6+FQdqumkEMwYsmU7ECxfv5PTdEJwGctsWZC9k4UtlSQbsFvFlUnSIPBLg3VaErQtlyhI0sUKCwlIaFOP4ofXHyichSR9IJ3V1DhfdgO4ZHY8gIZ7eV/e1Hq7+IAc5n0og0DOsMMxYC0ZIube1ZpvJuYgwEKkySC6q8/u/Y4069pe59fxXnhDx9eOErkDU+hyB6Oh+hPEknXh4OufmVaWmcXqG2NCM5/e2pedSn6m81DlRUmrlRCgn1FB/cT++dZCBOSwq/4retbKB4Vmb9KAtuNen6eejzfDplkz9ciBG1Ef7Dz3s+Is6sbJopX8AkL7NU8=",
-            'service' => "eJztlUFrwjAYhu+F/oeseKhQ+gPqxhjrNnZxomUnocT2cwZi0iWpDIb/fWlTbZwOO+dhB3MJJG+evPnSt7m+LRYFch0B7yURkHKWAUrT+HmcpihE3jQMpznm04xiKcMEz4Di+O4l1Ku8geu4Tj2BzMQExIro9Z+ug3STCiuSoXnJMkU4Q0+gEp5z6fcbQdUEqFIwtCVHUSsbGNnadD9C/V4p6FGmUbXIw7gRl1pZVQOkspm9HGQmSIY5urHJcT08g9qtJRcgC83CWt2URUbRPV4WfMJnArOcb7cJLPjGYNXI3N9i+ptDjasBJiGKHjGhvlcjJYIPJbC88oJ2hUU65mskyCumJMdiyNWwpPQ83h6E4EgXbGXYKDNemR5iJeUn253AW2M3IcXhOgaeuSPvz6aV3gLpz7Fxf6LlBMTGMl5itjjT7e+ZNfDf+N0Py24GjiamVPZZvkWxU2wuoflnoQnsf+UlOd2Ts5+FLm9YDBQUdHjGbGELXn8B+B9fhw==",
+            'dao' => 'eJyVk8FLwzAUxu+F/g8h9JDCRu9TpsOKeNLDxHPWvrlCSEqSojD6v/vSxNlqu245hfL93vde3tfbu/pQx1EcFYIbQ7Z8B4LnmxdyjCOCx1huq4LsG1nYSknyBHarSmVYGgTuaLCNlgSx1QoFLF2usZAARn09ih8ev6BoLLD0hvSOr9GebiN2LPk8gIZr/d4d9MP27YPluN+rMpb5IiQpOQ465dspx4xzR7EAX2ycgwALM7MG0VXj9p95Yubmz8iL8104/QWDn+to5ilMoasdTEbsVzCXs5NP6yKeaGW5Wa4/MDI0c0nuqOxYlS1dhBoPSlqthAB9jwrq1vaP2wgRDMep7g8ZoLVLC82epQFtp1kXqgFX+o3TzK9+pmEvGho3zvetLvksjXtFFN/sG5ZhOjg=',
+            'service' => 'eJztVU1PwkAQvZPwH9aGAySkP6BoDIoaD6JB4omkGdohbLLs1tktagz/3S0LtHwINXDwwF7aTN+8eTudt3t5nYwTVq0QvqecMFQyQhaGncdeGDKfeQPfH0xUjGIQCdDa78MQBTxlEd9meq39qTGotcRO+7lM2hQEj8EoWiTfgMa3ZWxJUK3MPzLH/Io05Zbpu1phdmkDhkdslMrIcCXZA5q+ipWuNxaAbBGalCRbSQuCHNZysJl7/Epar6UkDnI6VE65m+5FaYvM+oLaFDlrMeqIeASKXRWZO/PwEOdqC3BCnVgusOi1zgXBLUwS9aqGBDJWq1rNQoWlymzxUX3F1VjurJcFpMYguAcu6t6cUjP8NAT6wmvmGQWmUuLcK3WV6aZCnEbdHZFitm9uoohFTq20IZkKdRLBfZ6oNhF87ZTc9Nwf847WbmwdZodzsYlTKIcJyPEe8cdrdhX+JNv1y4qW+LEY940J3zaZ844LHDZaaoq73XBwKbedvfavvdYsHrhnw+2XvcNN2wYpcx92UKDBEldiEZgTz34AQFOhng==',
             'banco' => 'eJztVt9v2jAQfkfif/AsHoJE6esUBlUg2YREC0vyUKmqImMOiAQ22I7aauJ/r+NEKAkprTZW7WERUsj98Hd339nnbze79a7ZELBPYgERZxRQFLljP4pQF+HrbveacraMV/mrq81xr9loNuiGSImGhFGOfjUbSD9SERVT1NoteK8skftNRRIzCUJVhGsuqyIJbE0qskQmRMRVjHkaigmtIF0mjKqYMxSzWFntPFBjAJulbRtI1EetH5Pp0JkED1jnyfDjA04V+LF34mACqvUwmjqXPN5ap1xX52YSqnUymtrg9puSg/6uM8uKX7LMREfjw1t1HImYCMN6TTWzIhfwlHgpGKVPK81BIzN4QjN3auHtiw7STqvdx90CKV3co2siJKh+opZfcadczE6JjyLmEeVqoJ0dpUQ8TxRYGs22nTD0I8/3b6eu10FGlH9F3v3Im4Xj6V27V1yqsnBWYTzyPSf0kOuEztAJPDT+ju6mIfLux0EYoGMihiidCa6PD56BWumS1fgFqEQw5IPccU2MbQcJpSClhbMNRzULC/3iWySTVMG/4OIaB0oUXVveM4Wdoa0F7QoRai34k6HBJYrMiYSjtYU9ITgiGY4wMByZXGydWwuuBitQtxqWrMBql4DfaR8XNqD+NxDCrj+dldrns1qH7MjqI71z0hW/20MG8KJNNEwkJWLEGTyTT+iixZyRLfTLzPwb3ZSTbdb/G9tfl5iqy5JnBkiw39QNY31x0JxkHxWSz7K55AKITrgwBYk0W62adhnszDY6nEXIB2gKkv39GE5u+zbUZc/t4OfkT9nygZ4b+OXj/OSiUbws1CtNIxRU751eAs6NPp2G/t0MXgH8C/1r',
             'rota' => 'eJylVe9O2zAQ/47EOxgTiUTLmiFtXyiFsZFtaCBYWpBQCJZJr220NMkch3Wq+jR7lL3Yzk5S0jaID1iVGt+/39n3u/PhcTbJtrcE/CoiAYSGMc/zjodbyGUHdbS71LI0CZVJmkiRxjEIp7Q+KeTk81JYO21vaS3xUsnz+fYWwZUVD3EUEkMombZR0lGRhDJKE8IYxs6lKEJpWnNiyEmUvz3SxqRH/KBLFhs+Y5CmUYjYJgYPeUpsI0MHGEdDjj4jHudgzatIfDhs2tqEfnUHtOlidRdr8bM0fw3A1WX/RYTiVQDXL8UfQgwSXgFx6p67A3cTZQ1nw9GYgkyHiEYacEscXVY/QPwwnWYcS07RmdpUOeNf6YwfS1/ahgozCAvJBRKm1KhliJLAGDyB36Sis2l1GyZVcj1isL7r3bieTz33x7XbH7ALd/Dt8pQGTXPM7RPPAe2p048kXPBkzB2eRXTNCi2Qwgz7JYt5WN678rQptTehrr0zGjTzchwiQBYi0cE2Y5d/KgtKjsvdARFSRNPy8lHeDDdKBfBwYq70Ev50CzavTK1oZGq5X19+QHZ69U1ZRDV+lBTQfc7rqVLBemh9gkceo1IRsEdWh8bBwY3WiUH6E5KVQjVhlgF8CkKk7TBqTaTMmIA8w3kCOFWGYL5/t98WVq36wpfhn7GDWSRbVItV0doWuTiGmeLN7j3tZLhjFTVYyOP4gYc/TTTbc+7mpn9/twjeWHcLZw+7pua4aUxxGlZJUvP46pB2jKm/H3TokX/voAPtLlSXlVVQXRRYHWrs0s1Kafwpl4oSOjGbVD2bccGx0iLNrdbiPenxLFwI/oeNoliCMBsqe4TZhhP+CBbpHZGdKGdRImuRfeJ5J7fsy9n5wPXYdd9l393btqL4xtMjY1f8U5MCZlmsakk/Yi+Vp9XTImgLsvpqdZyNd6sBUj9azzBDFYoVOQimasL06c3WJG1SFkCdvnkvtJpIpaLatKbdQrIGoxqfrRz/0AxZZV81i0LGtxXUaE1yPoapFlH1QJPk39+UQKJPxLGB7Xr4ISD+/gNl+1Wu',
             'response' => 'eJzVkb9OwzAQh/dKfYer1cGR+galrRhAYmCBsYqQ6zqJkWNHPptSAe/OOcq/AiMDnKIokX/58t3d1a6pmvlMGoEIDwobZ1HB23wGVBhE0BKKaGXQzsJjlFIhcgxe2xKWtbIoSlXDBmw0ZgXCe3F+d4dnJQMsfcIRg473edYxU+mCa3xKn/CBkU0DqULl3QmsOsGdfRFGH699GSkdbl6lapIPZ/e9wFEBxuTmwB28LkVwXosFy9Yj9GN8JDUKWJfMLv/KOgyDzRaCj2r15bz3bQOD/SSVry8aXai6CWc+DONbn73LnvURlpMXb2eZjVOcdtLex3ciRG8HUpekfn9e463Q5m/usBCmEr+5QQLi/14hXbvtJ+SFBcY=',
             'request' => 'eJxtkV9LwzAUxd8H+w53ow8NVPY+rUNRfJyoLyISYna7RbI05g8ypN/dpO3W0O2+JNx7cvLLyc1K7/R0wiWzFl7wx6N18DedQCjtv6TgANmdlFDCx+f1qH+/fni/OHh6fLvYf16/ngbdqPKKO1EroJTXyjrjuctJDxArczthr247x4zGdbWEwTvR9O4ZbTcnVaIz7DcIKiGRbtHFGx0qZ/N5CGG5WAilvZuT1PnbBrYS4kI3yOsN5tGlgECKqVJUkHfqWVmC8lISSJ6RYPapteLEoEFp8fwI7nUa5bE0MxZpyKvHaYVkJIpMs9B3h7ybkxFCbKYIZ5F2P8+MYQe6R7MNrx+yLoa/KRLjI0UTo2/+AcTPm20=',
             "htaccess" => "eJwLSi0vyixJdc1Lz8xLVfDP4+UKgog45+elKKhWB7kGhroGh8S7efq4+jn6utYqKOqmEaMoBa4oqDQnVSFOQ09LU0UhMy8ltUKvIKNAITow2FHHJxYAgOUogQ==",
+            'model' => 'eJyVjcEKwjAMhu+DvUMOg+nBvsBkY04QD6KIeBqUrlZXqG1tOy/iu7uuThBP/gmBJH++zAvd6jgy7NZxw7CSlAHGy/UeY0CQ1gjVdyL4iThlaiqItehAGibIcZyiHpBm/yEWxLIfgI9hDeEDPOIIeumuEZyCdYbLCySUXLXKwirUcyep40pCKRwzxFTeMRn9Qzd9s57+ydfNirngHy1ehrnOSEhcy+0sr8rNbpt9AH0W+QtDN1+y',
             "index" => "eJx9jD0LwjAURfdC/0MoDslgwLlWlyK4di6EkF5o/UjieynVf29bcXGQO95zzv4Y+5hnHdzNEiQnGlwy6RXB1U6VeUZ4jAPBBO8gjKnPjTFCi6LVuj2RvWMKdNVzpPiFiznJrJuQLP8FwDF4xpfJsw0tjqiExyRWX6r1WAbXB3Hh4A28Cx3kh94e8IQbkyWpVPkGSyZGUw==",
         ];
-        if(in_array($tipo, ['controller','dao','service'])){
+        
+        if(in_array($tipo, ['controller','dao','service','model'])){
             $str = $relacoes[$tipo];
             $original = gzuncompress(base64_decode($str));
             $original = str_replace("Tabela",$arquivo,$original);
             return $original;
-        }else if(in_array($tipo, ['htaccess','banco','rota','request','response','index'])){
+        }
+        else if(in_array($tipo, ['htaccess','banco','rota','request','response','index'])){
             $str = $relacoes[$tipo];
             $original = gzuncompress(base64_decode($str));
             return $original;

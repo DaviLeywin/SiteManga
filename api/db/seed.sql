@@ -111,7 +111,7 @@ INSERT INTO GENEROS (NOME, DESCRICAO) VALUES
 ('Horror', 'Gênero que busca evocar medo e tensão psicológica.'),
 ('Aventura', 'Gênero que envolve jornadas e explorações emocionantes.');
 
-INSERT INTO GENEROS_MANGAS (MANGA_ID, GENERO_ID) VALUES
+INSERT INTO GENEROSMANGAS (MANGA_ID, GENERO_ID) VALUES
 (1, 1),
 (1, 10),
 (2, 1),
@@ -263,7 +263,7 @@ INSERT INTO FAVORITOS (MANGA_ID, USUARIO_ID) VALUES
 (15,7),
 (1,6);
 
-INSERT INTO COMENTARIOS_MANGA (MANGA_ID, USUARIO_ID, CONTEUDO) VALUES
+INSERT INTO COMENTARIOSMANGA (MANGA_ID, USUARIO_ID, CONTEUDO) VALUES
 (1, 1, 'Esse mangá é incrível! A história me prendeu desde o primeiro capítulo.'),
 (2, 2, 'Adorei os personagens e a arte é fantástica.'),
 (3, 3, 'Um dos melhores mangás que já li na vida!'),

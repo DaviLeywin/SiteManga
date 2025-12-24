@@ -41,7 +41,7 @@ $GLOBALS['sql'] = [
         DESCRICAO TEXT
     );",
 
-    "CREATE TABLE IF NOT EXISTS GENEROS_MANGAS (
+    "CREATE TABLE IF NOT EXISTS GENEROSMANGAS (
         ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
         MANGAS_ID INT NOT NULL,
         GENEROS_ID INT NOT NULL,
@@ -78,7 +78,7 @@ $GLOBALS['sql'] = [
         FOREIGN KEY (USUARIOS_ID) REFERENCES USUARIOS(ID) ON DELETE CASCADE
     );",
 
-    "CREATE TABLE IF NOT EXISTS COMENTARIOS_MANGA (
+    "CREATE TABLE IF NOT EXISTS COMENTARIOSMANGA (
         ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
         MANGAS_ID INT NOT NULL,
         USUARIOS_ID INT NOT NULL,
@@ -184,7 +184,7 @@ $GLOBALS['insert'] = [
     ('Horror', 'Gênero que busca evocar medo e tensão psicológica.'),
     ('Aventura', 'Gênero que envolve jornadas e explorações emocionantes.');",
 
-    "INSERT INTO GENEROS_MANGAS (MANGAS_ID, GENEROS_ID) VALUES
+    "INSERT INTO GENEROSMANGAS (MANGAS_ID, GENEROS_ID) VALUES
     (1, 1),
     (1, 10),
     (2, 1),
@@ -336,7 +336,7 @@ $GLOBALS['insert'] = [
     (15,7),
     (1,6);",
 
-    "INSERT INTO COMENTARIOS_MANGA (MANGAS_ID, USUARIOS_ID, CONTEUDO) VALUES
+    "INSERT INTO COMENTARIOSMANGA (MANGAS_ID, USUARIOS_ID, CONTEUDO) VALUES
     (1, 1, 'Esse mangá é incrível! A história me prendeu desde o primeiro capítulo.'),
     (2, 2, 'Adorei os personagens e a arte é fantástica.'),
     (3, 3, 'Um dos melhores mangás que já li na vida!'),

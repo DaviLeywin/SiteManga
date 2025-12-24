@@ -6,11 +6,11 @@ require_once "class.Response.php";
 
 $rotas = new Rotas();
 
-$rotas->get("/GetRankings/{id}","RankingsController@Get");
-$rotas->get("/GetAllRankings","RankingsController@GetTodos");
-$rotas->post("/InsertRanking","RankingsController@Post");
-$rotas->delete("/DeleteRankings/{id}","RankingsController@Delete");
-$rotas->put("/UpdateRankings/{id}","RankingsController@Put"); 
+$rotas->get("/GetMangas/{id}","MangasController@Get");
+$rotas->get("/GetAllMangas","MangasController@GetTodos");
+$rotas->post("/InsertMangas","MangasController@Post");
+$rotas->delete("/DeleteMangas/{id}","MangasController@Delete");
+$rotas->put("/UpdateMangas/{id}","MangasController@Put"); 
 
 $rotas->get("/GetAutores/{id}","AutoresController@Get");
 $rotas->get("/GetAllAutores","AutoresController@GetTodos");
@@ -30,11 +30,11 @@ $rotas->post("/InsertCapitulos","CapitulosController@Post");
 $rotas->delete("/DeleteCapitulos/{id}","CapitulosController@Delete");
 $rotas->put("/UpdateCapitulos/{id}","CapitulosController@Put"); 
 
-$rotas->get("/GetComentarios_Manga/{id}","Comentarios_MangaController@Get");
-$rotas->get("/GetAllComentarios_Manga","Comentarios_MangaController@GetTodos");
-$rotas->post("/InsertComentarios_Manga","Comentarios_MangaController@Post");
-$rotas->delete("/DeleteComentarios_Manga/{id}","Comentarios_MangaController@Delete");
-$rotas->put("/UpdateComentarios_Manga/{id}","Comentarios_MangaController@Put"); 
+$rotas->get("/GetComentariosManga/{id}","ComentariosMangaController@Get");
+$rotas->get("/GetAllComentariosManga","ComentariosMangaController@GetTodos");
+$rotas->post("/InsertComentariosManga","ComentariosMangaController@Post");
+$rotas->delete("/DeleteComentariosManga/{id}","ComentariosMangaController@Delete");
+$rotas->put("/UpdateComentariosManga/{id}","ComentariosMangaController@Put"); 
 
 $rotas->get("/GetFavoritos/{id}","FavoritosController@Get");
 $rotas->get("/GetAllFavoritos","FavoritosController@GetTodos");
@@ -42,27 +42,28 @@ $rotas->post("/InsertFavoritos","FavoritosController@Post");
 $rotas->delete("/DeleteFavoritos/{id}","FavoritosController@Delete");
 $rotas->put("/UpdateFavoritos/{id}","FavoritosController@Put"); 
 
-$rotas->get("/GetGeneros_Mangas/{id}","Generos_MangasController@Get");
-$rotas->get("/GetAllGeneros_Mangas","Generos_MangasController@GetTodos");
-$rotas->post("/InsertGeneros_Mangas","Generos_MangasController@Post");
-$rotas->delete("/DeleteGeneros_Mangas/{id}","Generos_MangasController@Delete");
-$rotas->put("/UpdateGeneros_Mangas/{id}","Generos_MangasController@Put"); 
-
 $rotas->get("/GetGeneros/{id}","GenerosController@Get");
 $rotas->get("/GetAllGeneros","GenerosController@GetTodos");
 $rotas->post("/InsertGeneros","GenerosController@Post");
 $rotas->delete("/DeleteGeneros/{id}","GenerosController@Delete");
 $rotas->put("/UpdateGeneros/{id}","GenerosController@Put"); 
 
-$rotas->get("/GetMangas/{id}","MangasController@Get");
-$rotas->get("/GetAllMangas","MangasController@GetTodos");
-$rotas->post("/InsertMangas","MangasController@Post");
-$rotas->delete("/DeleteMangas/{id}","MangasController@Delete");
-$rotas->put("/UpdateMangas/{id}","MangasController@Put"); 
+$rotas->get("/GetGenerosMangas/{id}","GenerosMangasController@Get");
+$rotas->get("/GetAllGenerosMangas","GenerosMangasController@GetTodos");
+$rotas->post("/InsertGenerosMangas","GenerosMangasController@Post");
+$rotas->delete("/DeleteGenerosMangas/{id}","GenerosMangasController@Delete");
+$rotas->put("/UpdateGenerosMangas/{id}","GenerosMangasController@Put"); 
+
+$rotas->get("/GetRankings/{id}","RankingsController@Get");
+$rotas->get("/GetAllRankings","RankingsController@GetTodos");
+$rotas->post("/InsertRankings","RankingsController@Post");
+$rotas->delete("/DeleteRankings/{id}","RankingsController@Delete");
+$rotas->put("/UpdateRankings/{id}","RankingsController@Put"); 
 
 $rotas->get("/GetUsuarios/{id}","UsuariosController@Get");
 $rotas->get("/GetAllUsuarios","UsuariosController@GetTodos");
 $rotas->post("/InsertUsuarios","UsuariosController@Post");
 $rotas->delete("/DeleteUsuarios/{id}","UsuariosController@Delete");
 $rotas->put("/UpdateUsuarios/{id}","UsuariosController@Put"); 
+
 echo json_encode($rotas->executar());
