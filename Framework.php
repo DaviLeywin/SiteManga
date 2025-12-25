@@ -3,9 +3,7 @@ require_once "api\banco\class.Banco.php";
 
 set_exception_handler(function (Throwable $e) {
 
-    if (!headers_sent()) {
-        header('Content-Type: application/json; charset=utf-8');
-    }
+    if (!headers_sent()) header('Content-Type: application/json; charset=utf-8');
 
     $code = 500;
     $tipo = 'ERRO_INTERNO';

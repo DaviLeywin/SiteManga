@@ -40,6 +40,7 @@ class CapitulosService {
 
     static function Put($request, $url){
         $descricao = CapitulosDAO::Describe();
+
         $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
@@ -52,7 +53,15 @@ class CapitulosService {
         $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return CapitulosDAO::Put($request, $url);
+        $Capitulos = new Capitulos();
+
+        $Capitulos->AlterarMangasId($request["MANGAS_ID"]); 
+        $Capitulos->AlterarNumeroCapitulo($request["NUMERO_CAPITULO"]); 
+        $Capitulos->AlterarTituloCapitulo($request["TITULO_CAPITULO"]); 
+        $Capitulos->AlterarDataLancamento($request["DATA_LANCAMENTO"]); 
+        $Capitulos->AlterarSinopse($request["SINOPSE"]); 
+
+        return CapitulosDAO::Post($Capitulos, $url);
     }
     
     static function Delete($url){

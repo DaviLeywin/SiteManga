@@ -37,6 +37,7 @@ class GenerosService {
 
     static function Put($request, $url){
         $descricao = GenerosDAO::Describe();
+
         $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
@@ -49,7 +50,12 @@ class GenerosService {
         $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return GenerosDAO::Put($request, $url);
+        $Generos = new Generos();
+        
+        $Generos->AlterarNome($request['NOME']);
+        $Generos->AlterarDescricao($request['DESCRICAO']);
+
+        return GenerosDAO::Post($Generos, $url);
     }
     
     static function Delete($url){

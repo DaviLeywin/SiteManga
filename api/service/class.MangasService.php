@@ -41,6 +41,7 @@ class MangasService {
 
     static function Put($request, $url){
         $descricao = MangasDAO::Describe();
+        
         $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         

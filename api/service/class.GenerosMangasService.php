@@ -37,6 +37,7 @@ class GenerosMangasService {
 
     static function Put($request, $url){
         $descricao = GenerosMangasDAO::Describe();
+
         $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
@@ -49,7 +50,12 @@ class GenerosMangasService {
         $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return GenerosMangasDAO::Put($request, $url);
+        $GenerosMangas = new GenerosMangas();
+
+        $GenerosMangas->AlterarMangasId($request['MANGAS_ID']);
+        $GenerosMangas->AlterarGenerosId($request['GENEROS_ID']);
+
+        return GenerosMangasDAO::Post($GenerosMangas, $url);
     }
     
     static function Delete($url){

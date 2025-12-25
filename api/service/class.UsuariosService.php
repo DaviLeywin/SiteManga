@@ -38,6 +38,7 @@ class UsuariosService {
 
     static function Put($request, $url){
         $descricao = UsuariosDAO::Describe();
+
         $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
@@ -50,7 +51,13 @@ class UsuariosService {
         $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return UsuariosDAO::Put($request, $url);
+        $Usuarios = new Usuarios();
+        
+        $Usuarios->AlterarNomeDeUsuario($request['NOME_DE_USUARIO']);
+        $Usuarios->AlterarEmail($request['EMAIL']);
+        $Usuarios->AlterarSenhaHash($request['SENHA_HASH']);
+
+        return UsuariosDAO::Post($Usuarios, $url);
     }
     
     static function Delete($url){

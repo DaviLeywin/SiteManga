@@ -39,6 +39,7 @@ class RankingsService {
 
     static function Put($request, $url){
         $descricao = RankingsDAO::Describe();
+
         $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
@@ -51,7 +52,14 @@ class RankingsService {
         $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return RankingsDAO::Put($request, $url);
+        $Rankings = new Rankings();
+
+        $Rankings->AlterarMangaID($request['MANGAS_ID']);
+        $Rankings->AlterarTipoRanking($request['TIPO_RANKING']);
+        $Rankings->AlterarPosicao($request['POSICAO']);
+        $Rankings->AlterarDataRanking($request['DATA_RANKING']);
+
+        return RankingsDAO::Post($Rankings, $url);
     }
     
     static function Delete($url){

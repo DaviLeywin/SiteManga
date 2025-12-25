@@ -38,6 +38,7 @@ class ComentariosMangaService {
 
     static function Put($request, $url){
         $descricao = ComentariosMangaDAO::Describe();
+
         $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
@@ -50,7 +51,13 @@ class ComentariosMangaService {
         $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return ComentariosMangaDAO::Put($request, $url);
+        $ComentariosManga = new ComentariosManga();
+
+        $ComentariosManga->AlterarMangasId($request['MANGAS_ID']);
+        $ComentariosManga->AlterarUsuariosId($request['USUARIOS_ID']);
+        $ComentariosManga->AlterarConteudo($request['CONTEUDO']);
+
+        return ComentariosMangaDAO::Post($ComentariosManga, $url);
     }
     
     static function Delete($url){

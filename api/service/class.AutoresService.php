@@ -2,7 +2,6 @@
 require_once __DIR__ . "\..\model\class.AutoresModel.php";
 require_once __DIR__ . "\..\dao\class.AutoresDAO.php";
 require_once __DIR__ . '\..\validator\class.BaseValidator.php';
-require_once __DIR__ . '\..\validator\class.AutoresValidator.php';
 
 class AutoresService {
     static function GetTodos(){
@@ -34,12 +33,13 @@ class AutoresService {
         $Autores->AlterarBiografia($request['BIOGRAFIA']);
         $Autores->AlterarDataNascimento($request['DATA_NASCIMENTO']);
         $Autores->AlterarNacionalidade($request['NACIONALIDADE']);
-        return $Autores;
+
         return AutoresDAO::Post($Autores);
     }
 
     static function Put($request, $url){
         $descricao = AutoresDAO::Describe();
+
         $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
@@ -52,7 +52,14 @@ class AutoresService {
         $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return AutoresDAO::Put($request, $url);
+        $Autores = new Autores();
+
+        $Autores->AlterarNome($request['NOME']);
+        $Autores->AlterarBiografia($request['BIOGRAFIA']);
+        $Autores->AlterarDataNascimento($request['DATA_NASCIMENTO']);
+        $Autores->AlterarNacionalidade($request['NACIONALIDADE']);
+
+        return AutoresDAO::Post($Autores, $url);
     }
     
     static function Delete($url){

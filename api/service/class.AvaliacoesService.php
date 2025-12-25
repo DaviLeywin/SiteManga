@@ -34,12 +34,12 @@ class AvaliacoesService {
         $Avaliacoes->AlterarNota($request["NOTA"]);
         $Avaliacoes->AlterarComentario($request["COMENTARIO"]);
         
-        return $Avaliacoes;
         return AvaliacoesDAO::Post($Avaliacoes);
     }
 
     static function Put($request, $url){
         $descricao = AvaliacoesDAO::Describe();
+
         $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
@@ -52,7 +52,14 @@ class AvaliacoesService {
         $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return AvaliacoesDAO::Put($request, $url);
+        $Avaliacoes = new Avaliacoes();
+
+        $Avaliacoes->AlterarMangasId($request["MANGAS_ID"]);
+        $Avaliacoes->AlterarUsuariosId($request["USUARIOS_ID"]);
+        $Avaliacoes->AlterarNota($request["NOTA"]);
+        $Avaliacoes->AlterarComentario($request["COMENTARIO"]);
+        
+        return AvaliacoesDAO::Post($Avaliacoes, $url);
     }
     
     static function Delete($url){
