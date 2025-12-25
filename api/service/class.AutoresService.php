@@ -59,7 +59,7 @@ class AutoresService {
         $Autores->AlterarDataNascimento($request['DATA_NASCIMENTO']);
         $Autores->AlterarNacionalidade($request['NACIONALIDADE']);
 
-        return AutoresDAO::Post($Autores, $url);
+        return AutoresDAO::Put($Autores, $url);
     }
     
     static function Delete($url){

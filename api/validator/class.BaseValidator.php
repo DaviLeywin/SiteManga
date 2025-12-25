@@ -79,9 +79,9 @@ class BaseValidator {
             preg_match('/^([a-zA-Z]+)/', $tipo, $res);
             if($DescCampo['Key'] == "UNI"){
                 $r = DAO::Get()->Table($tabela)->Where([$campo =>  $valor])->Execute();
-                if(isset($r['resultado'])){
+                if(isset($r['resposta'])){
                     if(!empty($url)){
-                        if($r['resultado']['ID'] !== $url['id']){
+                        if($r['resposta']['ID'] !== $url['id']){
                             $erro['atualizar'][] = [ 'valor' =>  $valor, 'mensagem' => 'valor UNIQUE ja existe em outra objeto!'];
                         }
                     }else{$erro['inserir'][] = ['valor' =>  $valor, 'mensagem' => 'valor UNIQUE ja existe em outra objeto!'];}

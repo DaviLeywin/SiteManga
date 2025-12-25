@@ -1,4 +1,7 @@
 <?php
+declare(strict_types=1);
+require_once __DIR__ . "\..\..\Framework.php";
+require_once __DIR__ . "\..\class.Response.php";
 
 class AutoresDAO {
     static function GetTodos(){
@@ -20,4 +23,3 @@ class AutoresDAO {
         return DAO::Describe()->Table("Autores")->Execute();   
     }
 }
-

@@ -132,130 +132,109 @@ class DAO {
 
     public function Where(array $dados = []){
         if(empty($dados)) throw new InvalidArgumentException("Dados do where nao pode estar vazio!");
-        foreach($dados as $nome => $value){
-            $this->wheres[$nome] = $value;
+        foreach($dados as $index => $value){
+            $this->wheres[$index] = $value;
         }
         return $this;
     }
 
-
-    public function Execute(){
-        $pdo = $this->init();
-        $tipo = $this->tipo;
-        $dados = $this->dados;
+    function CriarGet(){
         $tabela = $this->tabela;
-        $wheres = $this->wheres;
-        $groupBy = $this->groupBy ? $this->groupBy : null;
-        $orderBy = $this->orderBy ? $this->orderBy : null;
-        $dadosGet = $this->dadosGet ? implode(",",$this->dadosGet): "*";
-        $sql = "";
-        try{
-            
-            if(in_array($tipo, ['put','delete']) && empty($wheres)){
-                return ["erro" => true, "mensagem" => "Operação bloqueada: WHERE obrigatório"];
-            }
-    
-            if($tipo == "get"){
-                $sql = "SELECT $dadosGet FROM $tabela";
-            }
-    
-            else if($tipo == "delete"){
-                $sql = "DELETE FROM $tabela";
-            }
-            else if($tipo == "describe"){
-                $sql = "DESCRIBE $tabela";
-            }
-    
-            else if($tipo === "post"){
-                $campos = implode(",", array_keys($dados));
-                $valores = implode(",", array_map(function($v){
-                    if (is_string($v)) return "'" . addslashes($v) . "'";
-                    if ($v === null) return "NULL";
-                    return $v;
-                }, array_values($dados)));
-                $sql = "INSERT INTO $tabela ($campos) VALUES ($valores)";
-            }
-            else if($tipo === "put"){
-                $set = [];
-                foreach($dados as $campo => $valor){
-                    if (is_string($valor)) $valor = "'" . addslashes($valor) . "'";
-                    elseif ($valor === null) $valor = "NULL";
-                    $set[] = "$campo = $valor";
-                }
-                $sql = "UPDATE $tabela SET " . implode(", ", $set);
-            }
-            $conds = [];
-            if(!empty($wheres)){
-                $conds = [];
-                foreach($wheres as $campo => $valor){
-                    if (is_string($valor)) $valor = "'" . addslashes($valor) . "'";
-                    elseif ($valor === null) $valor = "NULL";
-                    $conds[] = "$campo = $valor";
-                }
-                $sql .= " WHERE " . implode(" AND ", $conds);
-            }
-            if($groupBy)$sql .= $groupBy;
-            if($orderBy)$sql .= $orderBy;
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute();
-            $this->dados = [];
-            $this->wheres = [];
-            $this->dadosGet = [];
-            $this->groupBy = null;
-            $this->orderBy = null;
-            
-            if($tipo == "describe"){
-                $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                if($res){
-                    return Response::Success("Descricao encontrada com sucesso!",$res);
-                }
-                return Response::Fail("Erro ao encontrar descricao!");
-            }
-
-            if($tipo === "get"){
-                $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                if(count($res) === 1){
-                    return ["erro" => false, "mensagem" => "Dados encontrados com sucesso" ,"resultado" => $res[0]];
-                }else if(count($res) > 1){
-                    return ["erro" => false, "mensagem" => "Dados encontrados com sucesso" ,"resultado" => $res];
-                }else if(count($res) === 0){
-                    return ["erro" => true, "mensagem" => "Dados nao encontrados!"];
-                }
-                return count($res) === 1 ? $res[0] : $res;
-            }
-    
-            if($tipo === "post"){
-                $id = $pdo->lastInsertId();
-                $sql = "SELECT * FROM $tabela WHERE ID = :ID;";
-                $stmt = $pdo->prepare($sql);
-                $stmt->bindParam(":ID",$id);
-                $stmt->execute();
-                $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-                return ["erro" => false, "resultado" => $resultado];
-            }
-    
-            if($tipo === "put"){
-                $linhas = $stmt->rowCount();
-                $sql = "SELECT * FROM $tabela" . " WHERE " . implode(" AND ", $conds);
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute();
-                $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-                if($linhas > 0) return ["erro" => false, "mensagem" => "Dados atualizados com sucesso" ,"resultado" => $resultado];
-                return ["erro" => true, "mensagem" => "Nenhum dado foi alterado"];
-            }
-    
-            if($tipo === "delete"){
-                $linhas = $stmt->rowCount();
-                if($linhas > 0){
-                    return ["erro" => false, "mensagem" => "Registro excluído com sucesso"];
-                }
-                return ["erro" => true, "mensagem" => "Nenhum registro foi excluído"];
-            }
-        }catch(Exception $e){
-            throw new InvalidArgumentException("Erro desconhecido no executar!");
+        $sql = "SELECT * FROM $tabela";
+        $wheres = $this->wheres ?" WHERE id = :id":"" ;
+        $sql .= $wheres;
+        $stmt = $this->pdo->prepare($sql);
+        if($wheres !== ""){
+            $stmt->BindParam(":id",$this->wheres['id']);
         }
+        $stmt->execute();
+        $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if($resultado) return Response::Success("Descricao encontrada com sucesso!",$resultado);
+        return Response::Fail("Falha ao encontrar dados!");
+    }
+
+    function CriarDelete(){
+        $tabela = $this->tabela;
+        $sql = "DELETE FROM $tabela WHERE id = :id";
+        $id = $this->wheres['id'];
+        $res = $this->GetById($tabela, $this->pdo, $id);
+        if(!$res) return Response::Fail("Imposivel apagar, dados inexistentes!");
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(":id",$id);
+        $stmt->execute();
+        $resultado = $this->GetById($tabela, $this->pdo, $id);
+        if(!$resultado) return Response::Success("Dados apagados com sucesso!");
+        return Response::Fail("Falha ao apagar os dados!");
+    }
+
+    function CriarDescribe(){
+        $tabela = $this->tabela;
+        $sql = "DESCRIBE $tabela";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if($resultado) return Response::Success("Descricao encontrada com sucesso!",$resultado);
+        return Response::Success("Falha ao buscar descricao!");
+    }
+
+    function GetById($tabela, $pdo, $id = null){
+        $id = !is_null($id) ? $id : $pdo->lastInsertId();
+        $sql = "SELECT * FROM $tabela WHERE ID = :ID;";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(":ID",$id);
+        $stmt->execute();
+        $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $resultado;
+    }
+
+    function CriarPost(){
+        $dados = $this->dados;
+        if(is_null($dados)) throw new InvalidArgumentException("Campo dados e obrigatorio para tipo post!");
+        $campos = implode(',',array_keys($dados));
+        $valores = array_map(function($valor){
+            if(is_string($valor)) return "'".$valor."'";
+            return $valor;
+        },array_values($dados));
+        $tabela = $this->tabela;
+        $pdo = $this->pdo;
+        $sql = "INSERT INTO $tabela ($campos) VALUES (". implode(',',$valores) .")";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        $resultado = $this->GetById($tabela, $pdo);
+        if($resultado) return Response::Success("Insercao feita com sucesso!",$resultado);
+        return Response::Fail("Falha ao inserir dados!");
 
     }
+
+    function CriarPut(){
+        $dados = $this->dados;
+        if(is_null($dados)) throw new InvalidArgumentException("Campo dados e obrigatorio para tipo post!");
+        if(empty($this->wheres)) throw new InvalidArgumentException("Campo where e obrigatorio para tipo post!");
+        $tabela = $this->tabela;
+        $set = [];
+        foreach($dados as $index => $valor){  $set[] = " $index = :$index";}
+        $sql = "UPDATE $tabela SET " . implode(",",$set) . " WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        foreach($dados as $index => $value){ $stmt->BindValue(":$index",$value);}
+        $stmt->BindParam(":id",$this->wheres['id']);
+        $stmt->execute();
+        $linhas = $stmt->rowCount();
+        $resultado = $this->GetById($tabela, $this->pdo, $this->wheres['id']);
+        if($linhas > 0) return Response::Success("atualizacao feita com sucesso!",$resultado);
+        else return Response::Fail("nenhuma linha foi atualizada!");
+    }
+
+
+    public function Execute(){
+        if(is_null($this->tabela)) throw new InvalidArgumentException("Campo tabela e obrigatório!");
+        if(is_null($this->tipo)) throw new InvalidArgumentException("Campo tipo e obrigatório!");
+        if($this->tipo == 'put') return self::CriarPut();
+        if($this->tipo == 'delete') return self::CriarDelete();
+        if($this->tipo == 'get') return self::CriarGet();
+        if($this->tipo == 'post') return $this->CriarPost();
+        if($this->tipo == 'describe') return self::CriarDescribe();
+    }
+
 }
 
 class Documento {

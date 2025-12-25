@@ -59,7 +59,7 @@ class AvaliacoesService {
         $Avaliacoes->AlterarNota($request["NOTA"]);
         $Avaliacoes->AlterarComentario($request["COMENTARIO"]);
         
-        return AvaliacoesDAO::Post($Avaliacoes, $url);
+        return AvaliacoesDAO::Put($Avaliacoes, $url);
     }
     
     static function Delete($url){

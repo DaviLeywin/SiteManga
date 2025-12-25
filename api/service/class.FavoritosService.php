@@ -55,7 +55,7 @@ class FavoritosService {
         $Favoritos->AlterarMangasId($request["MANGAS_ID"]);
         $Favoritos->AlterarUsuariosId($request["USUARIOS_ID"]);
 
-        return FavoritosDAO::Post($Favoritos, $url);
+        return FavoritosDAO::Put($Favoritos, $url);
     }
     
     static function Delete($url){

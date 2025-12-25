@@ -57,7 +57,7 @@ class UsuariosService {
         $Usuarios->AlterarEmail($request['EMAIL']);
         $Usuarios->AlterarSenhaHash($request['SENHA_HASH']);
 
-        return UsuariosDAO::Post($Usuarios, $url);
+        return UsuariosDAO::Put($Usuarios, $url);
     }
     
     static function Delete($url){

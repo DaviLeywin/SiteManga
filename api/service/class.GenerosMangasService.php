@@ -55,7 +55,7 @@ class GenerosMangasService {
         $GenerosMangas->AlterarMangasId($request['MANGAS_ID']);
         $GenerosMangas->AlterarGenerosId($request['GENEROS_ID']);
 
-        return GenerosMangasDAO::Post($GenerosMangas, $url);
+        return GenerosMangasDAO::Put($GenerosMangas, $url);
     }
     
     static function Delete($url){

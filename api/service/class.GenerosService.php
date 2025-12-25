@@ -55,7 +55,7 @@ class GenerosService {
         $Generos->AlterarNome($request['NOME']);
         $Generos->AlterarDescricao($request['DESCRICAO']);
 
-        return GenerosDAO::Post($Generos, $url);
+        return GenerosDAO::Put($Generos, $url);
     }
     
     static function Delete($url){

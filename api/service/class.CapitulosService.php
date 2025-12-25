@@ -14,7 +14,7 @@ class CapitulosService {
 
     static function Post($request){
         $descricao = CapitulosDAO::Describe();
-
+        
         $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
@@ -61,7 +61,7 @@ class CapitulosService {
         $Capitulos->AlterarDataLancamento($request["DATA_LANCAMENTO"]); 
         $Capitulos->AlterarSinopse($request["SINOPSE"]); 
 
-        return CapitulosDAO::Post($Capitulos, $url);
+        return CapitulosDAO::Put($Capitulos, $url);
     }
     
     static function Delete($url){

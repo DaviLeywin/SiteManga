@@ -57,7 +57,7 @@ class ComentariosMangaService {
         $ComentariosManga->AlterarUsuariosId($request['USUARIOS_ID']);
         $ComentariosManga->AlterarConteudo($request['CONTEUDO']);
 
-        return ComentariosMangaDAO::Post($ComentariosManga, $url);
+        return ComentariosMangaDAO::Put($ComentariosManga, $url);
     }
     
     static function Delete($url){

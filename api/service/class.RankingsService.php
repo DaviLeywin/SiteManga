@@ -59,7 +59,7 @@ class RankingsService {
         $Rankings->AlterarPosicao($request['POSICAO']);
         $Rankings->AlterarDataRanking($request['DATA_RANKING']);
 
-        return RankingsDAO::Post($Rankings, $url);
+        return RankingsDAO::Put($Rankings, $url);
     }
     
     static function Delete($url){
