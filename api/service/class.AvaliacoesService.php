@@ -29,6 +29,12 @@ class AvaliacoesService {
         
         $Avaliacoes = new Avaliacoes();
 
+        $Avaliacoes->AlterarMangasId($request["MANGAS_ID"]);
+        $Avaliacoes->AlterarUsuariosId($request["USUARIOS_ID"]);
+        $Avaliacoes->AlterarNota($request["NOTA"]);
+        $Avaliacoes->AlterarComentario($request["COMENTARIO"]);
+        
+        return $Avaliacoes;
         return AvaliacoesDAO::Post($Avaliacoes);
     }
 

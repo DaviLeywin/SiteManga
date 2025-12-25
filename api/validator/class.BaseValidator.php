@@ -21,7 +21,7 @@ class BaseValidator {
             if($DescCampo['Default'] !== null)continue;
             if($DescCampo['Null'] == 'YES')continue;
             if(!isset($dados[$DescCampo['Field']])) $erros['Campos NOT NULL faltando'][] = $DescCampo['Field'];
-            else if(empty(trim($dados[$DescCampo['Field']]))) $erros['Campos NOT NULL Vazio'][] = $DescCampo['Field'];
+            else if(empty(trim($dados[$DescCampo['Field']])) and $dados[$DescCampo['Field']] !== 0) $erros['Campos NOT NULL Vazio'][] = $DescCampo['Field'];
         }
         return $erros;
     }
@@ -62,7 +62,7 @@ class BaseValidator {
             'DOUBLE'  =>fn($v) => is_numeric($v),
             'BOOL'  =>fn($v) => is_bool($v) || $v === 0 || $v === 1, 
             'BOOLEAN'  =>fn($v) => is_bool($v) || $v === 0 || $v === 1,
-            'DATE'  =>fn($v) => strtotime($v) !== false,
+            'DATE'  => fn($v) => is_string($v) && (bool)preg_match('/^\d{4}-\d{2}-\d{2}$/', $v),
             'DATETIME'  =>fn($v) => strtotime($v) !== false,
             'TIMESTAMP'  =>fn($v) => strtotime($v) !== false,
             'TIME'  =>fn($v) => preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $v),
@@ -89,6 +89,10 @@ class BaseValidator {
             }
             $tipoBase = strtoupper($res[0]);
             if(strtoupper($res[0]) !== 'ENUM'){
+                // if($tipoBase == "DATE"){
+                //     echo json_encode($valor);
+                //     die;
+                // }
                 $valido = $relacoes[$tipoBase]($valor);
                 if(!$valido) $erro['tipo errado'][] = ['valor' =>  $valor,'tipo_esperado' => $tipo,];
             }else {
@@ -110,6 +114,11 @@ class BaseValidator {
         return true;
     }
 
+    static function ValidarCaracteres(string $valor,string $validos){
+        $regex = '/^['.$validos.']*$/';
+        return (bool) preg_match($regex, $valor);
+    }
+
     static function ValidarData(string $Data){
         if(!preg_match('/^\d{4}-\d{2}-\d{2}$/',$Data)){
             return false;
@@ -117,13 +126,21 @@ class BaseValidator {
         return true;
     }
 
-    static function ValidarFkId($ForeignKeyid){
-        if($ForeignKeyid <= 0){
+    static function ValidarPositivoInteiro(int $valor){
+        if($valor <= 0){
             return false;
         }
         return true;
     }
+
+    // static function CamelForStake(string $Palavra){
+    //     $partes = explode("_",strtolower($Palavra));
+    //     $partesFormatada = array_map(function($parte){
+    //         $LetraMaiuscula = strtoupper(mb_substr($parte,0,1));
+    //         return $LetraMaiuscula.mb_substr($parte,1);
+    //     },$partes);
+    //     return implode("",$partesFormatada);
+    // }
      
 }
-
 ?>

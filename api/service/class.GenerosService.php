@@ -28,6 +28,9 @@ class GenerosService {
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
         $Generos = new Generos();
+        
+        $Generos->AlterarNome($request['NOME']);
+        $Generos->AlterarDescricao($request['DESCRICAO']);
 
         return GenerosDAO::Post($Generos);
     }

@@ -14,7 +14,7 @@ class FavoritosService {
 
     static function Post($request){
         $descricao = FavoritosDAO::Describe();
-
+        return $descricao;
         $resposta = BaseValidator::CampoSobrando($request, $descricao);
         if($resposta) return Response::Fail("Campos extras!",$resposta);
         
@@ -28,6 +28,9 @@ class FavoritosService {
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
         $Favoritos = new Favoritos();
+
+        $Favoritos->AlterarMangasId($request["MANGAS_ID"]);
+        $Favoritos->AlterarUsuariosId($request["USUARIOS_ID"]);
 
         return FavoritosDAO::Post($Favoritos);
     }

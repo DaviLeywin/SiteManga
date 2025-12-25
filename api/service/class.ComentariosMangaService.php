@@ -29,6 +29,10 @@ class ComentariosMangaService {
         
         $ComentariosManga = new ComentariosManga();
 
+        $ComentariosManga->AlterarMangasId($request['MANGAS_ID']);
+        $ComentariosManga->AlterarUsuariosId($request['USUARIOS_ID']);
+        $ComentariosManga->AlterarConteudo($request['CONTEUDO']);
+
         return ComentariosMangaDAO::Post($ComentariosManga);
     }
 

@@ -29,6 +29,11 @@ class RankingsService {
         
         $Rankings = new Rankings();
 
+        $Rankings->AlterarMangaID($request['MANGAS_ID']);
+        $Rankings->AlterarTipoRanking($request['TIPO_RANKING']);
+        $Rankings->AlterarPosicao($request['POSICAO']);
+        $Rankings->AlterarDataRanking($request['DATA_RANKING']);
+
         return RankingsDAO::Post($Rankings);
     }
 

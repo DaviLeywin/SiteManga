@@ -29,6 +29,12 @@ class CapitulosService {
         
         $Capitulos = new Capitulos();
 
+        $Capitulos->AlterarMangasId($request["MANGAS_ID"]); 
+        $Capitulos->AlterarNumeroCapitulo($request["NUMERO_CAPITULO"]); 
+        $Capitulos->AlterarTituloCapitulo($request["TITULO_CAPITULO"]); 
+        $Capitulos->AlterarDataLancamento($request["DATA_LANCAMENTO"]); 
+        $Capitulos->AlterarSinopse($request["SINOPSE"]); 
+
         return CapitulosDAO::Post($Capitulos);
     }
 

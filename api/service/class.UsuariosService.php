@@ -28,6 +28,10 @@ class UsuariosService {
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
         $Usuarios = new Usuarios();
+        
+        $Usuarios->AlterarNomeDeUsuario($request['NOME_DE_USUARIO']);
+        $Usuarios->AlterarEmail($request['EMAIL']);
+        $Usuarios->AlterarSenhaHash($request['SENHA_HASH']);
 
         return UsuariosDAO::Post($Usuarios);
     }

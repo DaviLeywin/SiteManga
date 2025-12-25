@@ -53,7 +53,16 @@ class MangasService {
         $resposta = BaseValidator::ValidarTamanhoArray($request, $descricao);
         if($resposta) return Response::Fail("Erro ao validar tamanho dos campos",$resposta);
         
-        return MangasDAO::Put($request, $url);
+        $Mangas = new Mangas();
+
+        $Mangas->AlterarTitulo($request['TITULO']);
+        $Mangas->AlterarAutoresId($request['AUTORES_ID']);
+        $Mangas->AlterarDataPublicacao($request['DATA_PUBLICACAO']);
+        $Mangas->AlterarSinopse($request['SINOPSE']);
+        $Mangas->AlterarTipo($request['TIPO']);
+        $Mangas->AlterarStatus($request['STATUS']);
+
+        return MangasDAO::Put($Mangas, $url);
     }
     
     static function Delete($url){

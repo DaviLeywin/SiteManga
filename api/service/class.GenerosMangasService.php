@@ -29,6 +29,9 @@ class GenerosMangasService {
         
         $GenerosMangas = new GenerosMangas();
 
+        $GenerosMangas->AlterarMangasId($request['MANGAS_ID']);
+        $GenerosMangas->AlterarGenerosId($request['GENEROS_ID']);
+
         return GenerosMangasDAO::Post($GenerosMangas);
     }
 

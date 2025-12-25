@@ -30,7 +30,7 @@ class Mangas {
     }
     
     function AlterarAutoresId(int $AutoresId){
-        if(!BaseValidator::ValidarFkId($AutoresId)){
+        if(!BaseValidator::ValidarPositivoInteiro($AutoresId)){
             throw new InvalidArgumentException("AUTORES_ID tem que ser positivomaior que zero!");
         }
         $this->AUTORES_ID = $AutoresId;
