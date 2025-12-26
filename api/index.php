@@ -8,6 +8,7 @@ $rotas = new Rotas();
 
 $rotas->get("/GetMangas/{id}","MangasController@Get");
 $rotas->get("/GetAllMangas","MangasController@GetTodos");
+$rotas->get("/GetMangasGeneros","MangasController@GetMangasGeneros");
 $rotas->post("/InsertMangas","MangasController@Post");
 $rotas->delete("/DeleteMangas/{id}","MangasController@Delete");
 $rotas->put("/UpdateMangas/{id}","MangasController@Put"); 

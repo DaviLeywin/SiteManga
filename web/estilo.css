@@ -1,0 +1,169 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #fff;
+}
+
+/* ===== TOPO ===== */
+.top-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ccc;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.menu button {
+    padding: 6px 12px;
+    border: 1px solid #aaa;
+    background: #fff;
+    cursor: pointer;
+}
+
+.menu button:hover {
+    background: #f0f0f0;
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    gap: 5px;
+}
+
+.search input {
+    width: 300px;
+    padding: 6px;
+    border: 1px solid #aaa;
+}
+
+.lupa {
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #000;
+    border-radius: 50%;
+}
+
+.menu-icon {
+    cursor: pointer;
+}
+
+/* ===== CONTEÚDO ===== */
+.content {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+}
+
+/* ===== LISTA DE MANGÁS ===== */
+#mangas {
+    flex: 3;
+}
+.capa-manga {
+    width: 100%;
+    flex: 1;                 /* 🔥 ocupa todo o espaço livre do card */
+    border: 1px solid #000;
+    margin-bottom: 5px;
+
+    background: #eee;        /* só pra visualizar */
+    display: block;
+}
+
+.container-mangas-genero{
+    border: solid 1px #000000;
+    height: 45%;
+    width: 90%;
+}
+
+.titulo-manga {
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.manga {
+    flex: 0 0 120px;      /* largura fixa */
+    height: 100%;        /* agora funciona */
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 6px;
+    border: 1px solid #000;
+    text-align: center;
+    cursor: pointer;
+}
+.genero {
+    margin-bottom: 30px;
+}
+
+.genero h2 {
+    margin-bottom: 10px;
+}
+
+.carousel {
+    display: flex;
+    gap: 16px;
+    padding: 10px;
+    border: solid 1px black;
+
+    height: 220px;
+    overflow-x: auto;
+    align-items: stretch; /* 🔥 força filhos a esticarem */
+}
+
+.items {
+    flex: 1;
+    text-align: center;
+}
+
+.arrow {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #000;
+    background: #fff;
+    cursor: pointer;
+}
+
+.arrow:hover {
+    background: #eaeaea;
+}
+
+/* ===== RANKING ===== */
+.ranking {
+    flex: 1;
+    border: 1px solid #aaa;
+    padding: 20px;
+}
+
+.ranking h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.ranking p {
+    text-align: center;
+}

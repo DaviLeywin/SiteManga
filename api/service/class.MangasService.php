@@ -7,6 +7,10 @@ class MangasService {
     static function GetTodos(){
         return MangasDAO::GetTodos();
     }
+
+    static function GetMangasGeneros(){
+        return MangasDAO::GetMangasGeneros();
+    }
     
     static function Get($url){
         return MangasDAO::Get($url);

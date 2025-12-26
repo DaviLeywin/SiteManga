@@ -140,38 +140,32 @@ class DAO {
 
     function CriarGet(){
         $tabela = $this->tabela;
-        $sql = "SELECT * FROM $tabela";
-        $wheres = $this->wheres ?" WHERE id = :id":"" ;
-        $sql .= $wheres;
+        $temId = isset($this->wheres['id']);
+        $sql = match(true){
+            $temId => "SELECT * FROM $tabela WHERE id = :id",
+            default => "SELECT * FROM $tabela",
+        };
         $stmt = $this->pdo->prepare($sql);
-        if($wheres !== ""){
-            $stmt->BindParam(":id",$this->wheres['id']);
-        }
+        if($temId)$stmt->bindValue(":id",$this->wheres['id'], PDO::PARAM_INT);
         $stmt->execute();
         $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if($resultado) return Response::Success("Descricao encontrada com sucesso!",$resultado);
-        return Response::Fail("Falha ao encontrar dados!");
+        if($resultado) return Response::Success("Dados encontrados com sucesso!",$resultado);
+        return Response::Fail("Nenhum registro encontrado!");
     }
 
     function CriarDelete(){
-        $tabela = $this->tabela;
-        $sql = "DELETE FROM $tabela WHERE id = :id";
-        $id = $this->wheres['id'];
-        $res = $this->GetById($tabela, $this->pdo, $id);
-        if(!$res) return Response::Fail("Imposivel apagar, dados inexistentes!");
+        if(empty($this->wheres['id'])) throw new InvalidArgumentException("Dados do where nao pode estar vazio!");
+        $sql = "DELETE FROM ".$this->tabela." WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(":id",$id);
+        $stmt->bindValue(":id",$this->wheres['id'],PDO::PARAM_INT);
         $stmt->execute();
-        $resultado = $this->GetById($tabela, $this->pdo, $id);
-        if(!$resultado) return Response::Success("Dados apagados com sucesso!");
+        if($stmt->rowCount() > 0) return Response::Success("Dados apagados com sucesso!");
         return Response::Fail("Falha ao apagar os dados!");
     }
 
     function CriarDescribe(){
-        $tabela = $this->tabela;
-        $sql = "DESCRIBE $tabela";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
+        $sql = "DESCRIBE ".$this->tabela.";";
+        $stmt = $this->pdo->query($sql);
         $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if($resultado) return Response::Success("Descricao encontrada com sucesso!",$resultado);
         return Response::Success("Falha ao buscar descricao!");
@@ -228,11 +222,13 @@ class DAO {
     public function Execute(){
         if(is_null($this->tabela)) throw new InvalidArgumentException("Campo tabela e obrigatório!");
         if(is_null($this->tipo)) throw new InvalidArgumentException("Campo tipo e obrigatório!");
-        if($this->tipo == 'put') return self::CriarPut();
-        if($this->tipo == 'delete') return self::CriarDelete();
-        if($this->tipo == 'get') return self::CriarGet();
-        if($this->tipo == 'post') return $this->CriarPost();
-        if($this->tipo == 'describe') return self::CriarDescribe();
+        return match($this->tipo){
+            'put' => $this->CriarPut(),
+            'delete' => $this->CriarDelete(),
+            'get' => $this->CriarGet(),
+            'post' => $this->CriarPost(),
+            'describe' => $this->CriarDescribe(),
+        };
     }
 
 }
