@@ -35,6 +35,7 @@ class MangasDAO {
                 $mangas[$id] = [
                     'TITULO' => $linha['TITULO'],
                     'ID' => $linha['ID'],
+                    'CAPA_URL' => $linha['CAPA_URL'],
                     'GENEROS' => [],
                 ]; 
             }

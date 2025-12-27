@@ -6,14 +6,16 @@ async function fetchMangas() {
         method: 'GET',
     })
     const MangasDados = await resposta.json();
+    console.log(MangasDados.resposta)
     if(!MangasDados.sucesso){
         alert("Erro ao carregar mangas");
         return;
     }
     else if(MangasDados.sucesso){
         MangasDados.resposta.forEach( manga => {
+            console.log()
             const ContainerManga = document.createElement('div');
-            const CapaManga = document.createElement('div');
+            const CapaManga = document.createElement('img');
             const TituloManga = document.createElement('h3');
             
             ContainerManga.setAttribute('data-id-manga', manga.ID);
@@ -21,8 +23,21 @@ async function fetchMangas() {
             ContainerManga.classList.add('manga');
             CapaManga.classList.add('capa-manga');
             TituloManga.classList.add('titulo-manga');
-            
+            if(manga.CAPA_URL !== null){
+                CapaManga.src = manga.CAPA_URL;
+                CapaManga.alt = '#';
+            }else if(manga.CAPA_URL == null){
+                CapaManga.src = "CAPA_URL";
+                CapaManga.alt = '#';
+            }
             TituloManga.innerText = manga.TITULO;
+            const texto = manga.TITULO;
+            const tamanho = texto.length;
+            if(tamanho > 26){
+                const valor = manga.TITULO.substr(0,23)+"...";
+                TituloManga.innerText = valor;
+            }
+
             ContainerManga.appendChild(CapaManga);
             ContainerManga.appendChild(TituloManga);
             manga.GENEROS.forEach(genero => {
