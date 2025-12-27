@@ -78,5 +78,7 @@ class Banco {
         return Response::Success("Banco recriado com sucesso!");
     }
 }
-// echo json_encode(Banco::RecriarBanco());
+// echo json_encode(Banco::DeletarBanco());
+// echo json_encode(Banco::CriarBanco());
+// echo json_encode(Banco::CriarSql());
 ?>

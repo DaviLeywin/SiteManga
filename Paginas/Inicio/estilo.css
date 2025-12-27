@@ -1,80 +1,3 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
-
-body {
-    background: #fff;
-}
-
-/* ===== TOPO ===== */
-.top-bar {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 10px 20px;
-    border-bottom: 1px solid #ccc;
-}
-
-.logo {
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.menu button {
-    padding: 6px 12px;
-    border: 1px solid #aaa;
-    background: #fff;
-    cursor: pointer;
-}
-
-.menu button:hover {
-    background: #f0f0f0;
-}
-
-.search {
-    display: flex;
-    align-items: center;
-    margin-left: auto;
-    gap: 5px;
-}
-
-.search input {
-    width: 300px;
-    padding: 6px;
-    border: 1px solid #aaa;
-}
-
-.lupa {
-    padding: 6px 10px;
-    cursor: pointer;
-}
-
-.user {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.avatar {
-    width: 30px;
-    height: 30px;
-    border: 1px solid #000;
-    border-radius: 50%;
-}
-
-.menu-icon {
-    cursor: pointer;
-}
-
-/* ===== CONTEÚDO ===== */
-.content {
-    display: flex;
-    padding: 20px;
-    gap: 20px;
-}
 
 /* ===== LISTA DE MANGÁS ===== */
 #mangas {
@@ -103,8 +26,8 @@ body {
 }
 
 .manga {
-    flex: 0 0 120px;      /* largura fixa */
-    height: 100%;        /* agora funciona */
+      flex: 0 0 120px;
+    height: 100%; /* agora funciona */
 
     display: flex;
     flex-direction: column;
@@ -123,15 +46,50 @@ body {
     margin-bottom: 10px;
 }
 
+.seta {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #000;
+    margin: 5px;
+    background: #fff;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.seta:hover {
+    background: #eaeaea;
+}
+
+.seta.esquerda {
+    margin-right: 8px;
+}
+
+.seta.direita {
+    margin-left: 8px;
+}
+
+.carousel-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 230px;
+    width: 75vw;
+    overflow: hidden; /* 🔥 corta o excesso */
+    border: solid 1px black;
+}
+
 .carousel {
+    border: solid 1px black;
     display: flex;
     gap: 16px;
     padding: 10px;
-    border: solid 1px black;
-
+    width: 100%;
     height: 220px;
-    overflow-x: auto;
-    align-items: stretch; /* 🔥 força filhos a esticarem */
+
+    overflow-x: hidden;   /* 🔥 ESSENCIAL */
+    scroll-behavior: smooth;
+    align-items: stretch;
 }
 
 .items {

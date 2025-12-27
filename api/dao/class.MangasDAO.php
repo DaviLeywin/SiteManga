@@ -1,5 +1,4 @@
 <?php
-
 class MangasDAO {
     static function GetTodos(){
         return DAO::Get()->Table("Mangas")->Execute();            
@@ -48,5 +47,4 @@ class MangasDAO {
         return Response::Success("Dados de Generos e mangas encontrados com sucesso",$resultadoFinal);       
     } 
 }
-
 

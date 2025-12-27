@@ -1,0 +1,75 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+#root {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+}
+
+body {
+    background: #fff;
+}
+
+/* ===== TOPO ===== */
+.top-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ccc;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.menu button {
+    padding: 6px 12px;
+    border: 1px solid #aaa;
+    background: #fff;
+    cursor: pointer;
+}
+
+.menu button:hover {
+    background: #f0f0f0;
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    gap: 5px;
+}
+
+.search input {
+    width: 300px;
+    padding: 6px;
+    border: 1px solid #aaa;
+}
+
+.lupa {
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #000;
+    border-radius: 50%;
+}
+
+.menu-icon {
+    cursor: pointer;
+}
