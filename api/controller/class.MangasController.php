@@ -9,6 +9,11 @@ class MangasController {
     static function GetMangasGeneros($request, $url){
         return MangasService::GetMangasGeneros();
     }
+
+    static function GetMangaGeneroAutorCapitulos($request, $url){
+        $url["id"] = (int) $url["id"];
+        return MangasService::GetMangaGeneroAutorCapitulos($url);
+    }
     
     static function Get($request, $url){
         $url["id"] = (int) $url["id"];

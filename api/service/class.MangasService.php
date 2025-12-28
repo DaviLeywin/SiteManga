@@ -11,6 +11,10 @@ class MangasService {
     static function GetMangasGeneros(){
         return MangasDAO::GetMangasGeneros();
     }
+
+    static function GetMangaGeneroAutorCapitulos($url){
+        return MangasDAO::GetMangaGeneroAutorCapitulos($url);
+    }
     
     static function Get($url){
         return MangasDAO::Get($url);

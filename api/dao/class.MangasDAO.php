@@ -1,4 +1,5 @@
 <?php
+
 class MangasDAO {
     static function GetTodos(){
         return DAO::Get()->Table("Mangas")->Execute();            
@@ -47,5 +48,33 @@ class MangasDAO {
         $resultadoFinal = array_values($mangas);
         return Response::Success("Dados de Generos e mangas encontrados com sucesso",$resultadoFinal);       
     } 
-}
+    static function GetMangaGeneroAutorCapitulos($url){
+        $pdo = Banco::BuscarConexao();
+        $id = $url['id'];
 
+        $sqlManga = "SELECT * 
+        FROM MANGAS WHERE ID = $id;";
+        $stmt = $pdo->query($sqlManga);
+        $manga = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $sqlGenero = "SELECT G.* FROM GENEROS G
+        INNER JOIN GENEROSMANGAS GM ON GM.GENEROS_ID = G.ID
+        WHERE GM.MANGAS_ID = $id;";
+        $stmt = $pdo->query($sqlGenero);
+        $generos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $autoresId = $manga['AUTORES_ID'];
+        $sqlAutor = "SELECT * FROM AUTORES WHERE ID = $autoresId;";
+        $stmt = $pdo->query($sqlAutor);
+        $autor = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $sqlCapitulos = "SELECT * FROM CAPITULOS WHERE MANGAS_ID = $id ORDER BY NUMERO_CAPITULO + 0 ASC;";
+        $stmt = $pdo->query($sqlCapitulos);
+        $capitulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $manga['GENEROS'] = $generos; 
+        $manga['AUTOR'] = $autor; 
+        $manga['CAPITULOS'] = $capitulos; 
+        return Response::Success("Dados de Generos e mangas encontrados com sucesso",$manga);       
+    }
+}

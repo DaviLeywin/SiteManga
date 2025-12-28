@@ -8,6 +8,10 @@ class GenerosService {
         return GenerosDAO::GetTodos();
     }
     
+    static function GetMangaPorId($url){
+        return GenerosDAO::GetMangaPorId($url);
+    }
+
     static function Get($url){
         return GenerosDAO::Get($url);
     }

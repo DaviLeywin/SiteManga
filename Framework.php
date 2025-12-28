@@ -149,6 +149,7 @@ class DAO {
         if($temId)$stmt->bindValue(":id",$this->wheres['id'], PDO::PARAM_INT);
         $stmt->execute();
         $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if($temId)$resultado = $resultado[0];
         if($resultado) return Response::Success("Dados encontrados com sucesso!",$resultado);
         return Response::Fail("Nenhum registro encontrado!");
     }
