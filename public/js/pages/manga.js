@@ -1,26 +1,23 @@
-(async function(){
-function CarregarTelaInicial(){
-    history.pushState(null,null,'/SiteManga/Inicio');
-    Rotas();
+export async function RenderPageManga(titulo) {
+    const MangasDado = await FetchMangas(titulo)
+    await CreateHtmlManga(MangasDado);
 }
 
-const state = history.state;
-async function BuscarManga() {
-    if (!state || !state.id) {
-        return;
-    }
-    const id = state.id
-    resposta = await fetch(`/SiteManga/api/GetMangaGeneroAutorCapitulos/${id}`,{
-        method:'GET'
+import { router } from '../router.js'
+
+async function FetchMangas(titulo) {
+    console.log(titulo)
+    const resposta = await fetch(`/SiteLivros/api/GetMangaGeneroAutorCapitulos/${titulo}`,{
+        method: 'GET',
     })
-    const MangaDados = await resposta.json();
-    if(MangaDados.sucesso)MostarPagina(MangaDados.resposta);
-    else if(!MangaDados.sucesso)CarregarTelaInicial();
+    const MangasDados = await resposta.json();
+    if(!MangasDados.sucesso){return}
+    return MangasDados.resposta;
 }
 
-function MostarPagina(manga){
+async function CreateHtmlManga(manga) {
     const capa = document.getElementById('capa-do-manga');
-    capa.src = '/SiteManga/'+manga.CAPA_URL
+    capa.src = '/SiteLivros/public/assets/'+manga.CAPA_URL
     
     const titulo = document.getElementById('titulo');
     titulo.innerHTML = manga.TITULO;
@@ -56,15 +53,12 @@ function MostarPagina(manga){
         linksGeneros.push(linkGenero);
         linkGenero.addEventListener('click',(e)=>{
             e.preventDefault;
-            dadosDaPagina = [];
-            dadosDaPagina.ID = id;
-            dadosDaPagina.NOME = generoNome;
             const generofinal = generoNome.replaceAll(" ","-")
-            history.pushState({generoId:id,genero:generoNome}, null, `/SiteManga/Genero/${generofinal}`);
-            router.Executar()
+            history.pushState(null, null, `/SiteLivros/Genero/${generofinal}`);
+            router.Execute()
         })   
     })
-    generos.innerHTML = ''; // limpa
+    generos.innerHTML = ''; 
     
     linksGeneros.forEach((link, index) => {
         if (index > 0) {generos.append(', ');}
@@ -101,11 +95,7 @@ function MostarPagina(manga){
         capitulos.appendChild(containercapitulo)
         containercapitulo.addEventListener('click',() =>{
             const nomeManga = state.nomeFormatado
-            // history.pushState({id:manga.ID , nomeFormatado:nomeManga}, null, `/SiteManga/Manga/oi`);
-            history.pushState({mangaID:manga.ID},null,`/SiteManga/Manga/${nomeManga}/Capitulo/${capitulo.NUMERO_CAPITULO}`)
+            history.pushState({mangaID:manga.ID},null,`/SiteLivros/Manga/${nomeManga}/Capitulo/${capitulo.NUMERO_CAPITULO}`)
         })
     })
 }
-
-await BuscarManga();
-})()

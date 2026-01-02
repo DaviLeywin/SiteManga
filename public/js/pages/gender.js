@@ -1,25 +1,34 @@
-(async function(){
-
-const state = history.state;
-async function PegarMangasDoGenero() {
-    if(!state || !state.generoId){
-        return;
-    }
-    const id = state.generoId;
-    resposta = await fetch(`/SiteManga/api/GetMangaPorId/${id}`,{
+export async function RenderPageGender(params){
+    const resposta = await FetchMangasByGender(params);
+    await CreateHtmlGenders(resposta,params)
+}
+async function FetchGenderByName(params) {
+    const resposta = await fetch(`/SiteLivros/api/GetGeneroPorNome/${params}`,{
+        method:'GET'
+    }) 
+    const dados = await resposta.json();
+    console.log(dados)
+    if(!dados.sucesso)return;
+    return dados.resposta[0];
+}
+async function FetchMangasByGender(params) {
+    const genero = await FetchGenderByName(params);
+    const id = genero.ID;
+    const resposta = await fetch(`/SiteLivros/api/GetMangaPorId/${id}`,{
         method:'GET'
     })
     const dados = await resposta.json();
     if(!dados.sucesso)return;
-    MontarMangas(dados.resposta);
+    return dados.resposta;
 }
-function MontarMangas(mangas){
-    console.log(mangas)
+import { router } from '../router.js'
+
+async function CreateHtmlGenders(mangas, params) {
     mangas.forEach(manga => {
         const mangasHtml = document.getElementById('mangas');
         const generoHtml = document.getElementById('genero');
-        generoHtml.innerText = state.genero
-
+        generoHtml.innerText = params;
+        
         const mangaHtml = document.createElement('div');
         const capaHtml = document.createElement('div');
         const imagenCapaHtml = document.createElement('img');
@@ -41,17 +50,15 @@ function MontarMangas(mangas){
         dadosDoMangaHtml.appendChild(nomeDoMangaHtml);
         dadosDoMangaHtml.appendChild(statusDoMangaHtml);
 
-        imagenCapaHtml.src = "/SiteManga/"+manga.CAPA_URL
+        imagenCapaHtml.src = "/SiteLivros/public/assets/"+manga.CAPA_URL
         nomeDoMangaHtml.innerText = manga.TITULO
         statusDoMangaHtml.innerText = manga.STATUS
 
         mangaHtml.addEventListener('click', () => {
             const nomeManga = manga.TITULO.replaceAll(" ","-")
-            history.pushState({id:manga.ID , nomeFormatado:nomeManga}, null, `/SiteManga/Manga/${nomeManga}`);
-            router.Executar();
+            history.pushState(null, null, `/SiteLivros/Manga/${nomeManga}`);
+            router.Execute();
         });
         
     })
 }
-PegarMangasDoGenero()
-})()

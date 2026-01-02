@@ -1,0 +1,5 @@
+import '/SiteLivros/public/js/router.js'
+import '/SiteLivros/public/js/pages/home.js'
+// import {} from './pages/chapter.js'
+// import {} from './pages/gender.js'
+// import {} from './pages/manga.js'

@@ -7,9 +7,10 @@ require_once "class.Response.php";
 $rotas = new Rotas();
 
 $rotas->get("/GetMangas/{id}","MangasController@Get");
+$rotas->get("/GetMangasByTitulo/{titulo}","MangasController@Get");
 $rotas->get("/GetAllMangas","MangasController@GetTodos");
 $rotas->get("/GetMangasGeneros","MangasController@GetMangasGeneros");
-$rotas->get("/GetMangaGeneroAutorCapitulos/{id}","MangasController@GetMangaGeneroAutorCapitulos");
+$rotas->get("/GetMangaGeneroAutorCapitulos/{titulo}","MangasController@GetMangaGeneroAutorCapitulos");
 $rotas->post("/InsertMangas","MangasController@Post");
 $rotas->delete("/DeleteMangas/{id}","MangasController@Delete");
 $rotas->put("/UpdateMangas/{id}","MangasController@Put"); 
@@ -46,6 +47,7 @@ $rotas->put("/UpdateFavoritos/{id}","FavoritosController@Put");
 
 $rotas->get("/GetGeneros/{id}","GenerosController@Get");
 $rotas->get("/GetMangaPorId/{id}","GenerosController@GetMangaPorId");
+$rotas->get("/GetGeneroPorNome/{nome}","GenerosController@Get");
 $rotas->get("/GetAllGeneros","GenerosController@GetTodos");
 $rotas->post("/InsertGeneros","GenerosController@Post");
 $rotas->delete("/DeleteGeneros/{id}","GenerosController@Delete");

@@ -5,14 +5,13 @@ class GenerosController {
     static function GetTodos($request, $url){
         return GenerosService::GetTodos();
     }
-
+    
     static function GetMangaPorId($request, $url){
         $url["id"] = (int) $url["id"];
         return GenerosService::GetMangaPorId($url);
     }
     
     static function Get($request, $url){
-        $url["id"] = (int) $url["id"];
         return GenerosService::Get($url);
     }    
 

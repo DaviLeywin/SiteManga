@@ -111,14 +111,12 @@ class DAO {
         return $this;
     }
 
-
     public function GroupBy($groupBy = null){
         $groupBy = strtolower($groupBy);
         if(!preg_match('/^[a-z0-9_]+$/',$groupBy))throw new InvalidArgumentException("Group by deve conter uma string/campo!");
         $this->groupBy = " GROUP BY $groupBy;";
         return $this;
     }
-
 
     public function Dados(object $dados = null){
         if(empty($dados)) throw new InvalidArgumentException("Dados nao podem estar vazios!");
@@ -129,7 +127,6 @@ class DAO {
         return $this;
     }
 
-
     public function Where(array $dados = []){
         if(empty($dados)) throw new InvalidArgumentException("Dados do where nao pode estar vazio!");
         foreach($dados as $index => $value){
@@ -139,19 +136,35 @@ class DAO {
     }
 
     function CriarGet(){
-        $tabela = $this->tabela;
-        $temId = isset($this->wheres['id']);
-        $sql = match(true){
-            $temId => "SELECT * FROM $tabela WHERE id = :id",
-            default => "SELECT * FROM $tabela",
-        };
-        $stmt = $this->pdo->prepare($sql);
-        if($temId)$stmt->bindValue(":id",$this->wheres['id'], PDO::PARAM_INT);
+        $sql = "SELECT * FROM ".$this->tabela;
+        $sql .=  $this->CriarWhere($this->wheres);
+        $stmt = $this->CriarBind($sql, $this->wheres);
         $stmt->execute();
         $resultado = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if($temId)$resultado = $resultado[0];
         if($resultado) return Response::Success("Dados encontrados com sucesso!",$resultado);
         return Response::Fail("Nenhum registro encontrado!");
+    }
+
+    static function CriarWhere($wheres){
+        if(empty($wheres))return "";
+        $array = [];
+        foreach($wheres as $index => $value){
+            $index = strtoupper($index);
+            $array[] = " $index = :$index ";
+        }
+        $sql = ' WHERE'. implode("and",$array);
+        return $sql;
+    }
+
+    static function CriarBind($sql, $wheres){
+        $pdo = Banco::BuscarConexao();
+        $stmt = $pdo->prepare($sql);
+        if(empty($wheres))return $stmt;
+        foreach($wheres as $index => $value){
+            $index = strtoupper($index);
+            $stmt->BindValue(":$index",$value);
+        }
+        return $stmt;
     }
 
     function CriarDelete(){
@@ -377,4 +390,5 @@ class Documento {
     }
 
 }
+// print_r(DAO::GetPica(['tipo'=>'manga',]));
 ?>

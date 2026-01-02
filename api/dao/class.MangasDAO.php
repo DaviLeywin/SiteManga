@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+require_once __DIR__ . "\..\..\Framework.php";
 
 class MangasDAO {
     static function GetTodos(){
@@ -50,13 +52,13 @@ class MangasDAO {
     } 
     static function GetMangaGeneroAutorCapitulos($url){
         $pdo = Banco::BuscarConexao();
-        $id = $url['id'];
-
-        $sqlManga = "SELECT * 
-        FROM MANGAS WHERE ID = $id;";
+        $titulo = str_ireplace("-"," ",$url['titulo']);
+        
+        $sqlManga = "SELECT * FROM MANGAS WHERE TITULO = '$titulo';";
         $stmt = $pdo->query($sqlManga);
         $manga = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        $id = $manga['ID'];
         $sqlGenero = "SELECT G.* FROM GENEROS G
         INNER JOIN GENEROSMANGAS GM ON GM.GENEROS_ID = G.ID
         WHERE GM.MANGAS_ID = $id;";

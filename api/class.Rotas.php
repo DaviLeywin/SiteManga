@@ -17,8 +17,9 @@ class Rotas{
     function executar(){
         $request = new Request();
         $metodo = $_SERVER["REQUEST_METHOD"];
-        $urlBase = "/SiteManga/api";
+        $urlBase = "/SiteLivros/api";
         $url = str_ireplace($urlBase,"",$_SERVER["REQUEST_URI"]);
+        $url = urldecode($url);
         $url = $url == "/" ? $url : rtrim($url,"/");
         foreach($this->rotas as $rota){
             if($rota["metodo"] != $metodo) continue;
