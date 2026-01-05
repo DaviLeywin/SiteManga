@@ -1,0 +1,1 @@
+Vou encerrar o projeto por aqui. Notei que a ideia era boa, mas, por um erro meu, acabei estruturando-o de forma que prejudicasse um bom desenvolvimento nos meus estudos. Começarei outro projeto maior, que ofereça mais áreas para eu estudar. Não foi inútil, mas perdeu importância neste momento.
